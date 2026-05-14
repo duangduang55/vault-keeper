@@ -5,6 +5,7 @@ use tauri::State;
 
 use crate::commands::auth::AppState;
 use crate::{commands, crypto, db, error::AppError};
+use time::OffsetDateTime;
 
 /// iCloud Drive 备份目录
 pub fn icloud_dir() -> PathBuf {
@@ -43,13 +44,17 @@ pub async fn icloud_backup(
     let dir = icloud_dir();
     std::fs::create_dir_all(&dir)?;
 
-    let now = chrono_now();
+    let now = formatted_now();
     let filename = format!("vault-keeper-backup-{}.bin", now);
     let path = dir.join(&filename);
     std::fs::write(&path, &encrypted)?;
 
-    // 更新上次备份时间戳
-    db::MetadataRepo::set(conn.inner(), "last_icloud_backup", &now)?;
+    // 更新上次备份时间戳（stored as Unix seconds for comparison）
+    let unix_now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    db::MetadataRepo::set(conn.inner(), "last_icloud_backup", &unix_now.to_string())?;
 
     Ok(IcloudBackupResult {
         path: path.to_string_lossy().to_string(),
@@ -143,12 +148,17 @@ pub async fn icloud_restore(
     Ok(IcloudRestoreResult { imported, skipped })
 }
 
-fn chrono_now() -> String {
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs();
-    now.to_string()
+/// 格式化为 YYYYMMDDHHmm 可读时间戳
+fn formatted_now() -> String {
+    OffsetDateTime::now_local()
+        .map(|t| format!("{:04}{:02}{:02}{:02}{:02}", t.year(), u8::from(t.month()), t.day(), t.hour(), t.minute()))
+        .unwrap_or_else(|_| {
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs()
+                .to_string()
+        })
 }
 
 // --- 响应类型 ---
