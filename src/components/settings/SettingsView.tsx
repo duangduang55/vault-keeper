@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { Button } from '../common/Button'
 import { BackupSection } from './BackupSection'
 import { IcloudSection } from './IcloudSection'
+import { ShortcutRecorder } from './ShortcutRecorder'
 import { toast } from '../common/Toast'
 import type { AppConfig } from '../../types/common'
 
@@ -161,12 +162,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
           <p className="text-xs text-surface-500">设置全局快捷键快速唤出或隐藏 Vault Keeper 窗口</p>
           <p className="text-xs text-surface-400">当前: <code className="bg-surface-900 px-1.5 py-0.5 rounded text-primary-400">{shortcut}</code></p>
           <div className="flex gap-2">
-            <input
-              value={shortcutInput}
-              onChange={(e) => setShortcutInput(e.target.value)}
-              placeholder="例如: CmdOrCtrl+Shift+V"
-              className="flex-1 bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-            />
+            <ShortcutRecorder value={shortcutInput} onChange={setShortcutInput} />
             <Button size="sm" onClick={handleShortcutSave} disabled={savingShortcut || shortcutInput === shortcut}>
               {savingShortcut ? '保存中...' : '保存'}
             </Button>
@@ -182,12 +178,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
           <p className="text-xs text-surface-500">按下快捷键快速锁定保险箱，无需手动点击锁定</p>
           <p className="text-xs text-surface-400">当前: <code className="bg-surface-900 px-1.5 py-0.5 rounded text-primary-400">{lockShortcut}</code></p>
           <div className="flex gap-2">
-            <input
-              value={lockShortcutInput}
-              onChange={(e) => setLockShortcutInput(e.target.value)}
-              placeholder="例如: CmdOrCtrl+Shift+L"
-              className="flex-1 bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
-            />
+            <ShortcutRecorder value={lockShortcutInput} onChange={setLockShortcutInput} />
             <Button size="sm" onClick={handleLockShortcutSave} disabled={savingLockShortcut || lockShortcutInput === lockShortcut}>
               {savingLockShortcut ? '保存中...' : '保存'}
             </Button>

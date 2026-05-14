@@ -27,10 +27,13 @@ pub fn run() {
                 .with_handler(move |app, shortcut, event| {
                     if event.state != ShortcutState::Pressed { return; }
                     let shortcut_str = shortcut.to_string();
-                    // 检查是否锁定快捷键
+                    // macOS 上 CmdOrCtrl 会被解析为 Cmd/Command，需要归一化后再比较
+                    let normalized = shortcut_str
+                        .replacen("Command+", "CmdOrCtrl+", 1)
+                        .replacen("Cmd+", "CmdOrCtrl+", 1);
                     if let Some(state) = app.try_state::<AppState>() {
                         if let Ok(lock_shortcut) = state.current_lock_shortcut.lock() {
-                            if shortcut_str == *lock_shortcut {
+                            if normalized == *lock_shortcut {
                                 let _ = state.keychain.lock();
                                 let _ = app.emit("vault-locked", ());
                                 return;
