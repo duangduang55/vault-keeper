@@ -127,7 +127,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         {/* 关于 */}
         <div className="bg-surface-800/50 border border-surface-700/50 rounded-xl p-4 space-y-3">
           <h3 className="text-sm font-medium text-surface-100">关于 Vault Keeper</h3>
-          <p className="text-xs text-surface-400">版本 0.1.0</p>
+          <p className="text-xs text-surface-400">版本 0.1.1</p>
           <p className="text-xs text-surface-500">基于 Tauri 2.0 + React + SQLCipher 构建</p>
           <p className="text-xs text-surface-500">所有数据使用主密码 + AES-256 加密存储在本地</p>
         </div>
