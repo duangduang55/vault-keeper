@@ -5,6 +5,7 @@ use tauri::State;
 use crate::crypto::{self, hasher, keychain::LockState};
 use crate::db;
 use crate::error::{AppError, AppResult};
+use tauri_plugin_global_shortcut::GlobalShortcutExt;
 
 /// 应用共享状态
 pub struct AppState {
@@ -105,6 +106,7 @@ pub async fn setup(
 /// 解锁保险箱
 #[tauri::command]
 pub async fn unlock(
+    app_handle: tauri::AppHandle,
     state: State<'_, AppState>,
     password: String,
 ) -> Result<UnlockResult, AppError> {
@@ -139,10 +141,34 @@ pub async fn unlock(
     }
 
     // 验证数据库密钥
-    let _db = db::Connection::open_with_key(&db_path, derived_key.expose_secret())?;
+    let db = db::Connection::open_with_key(&db_path, derived_key.expose_secret())?;
 
     // 设置密钥到密钥链
     state.keychain.set_key(derived_key)?;
+
+    // 从加密库加载保存的快捷键配置，覆盖默认值并重新注册
+    if let Some(shortcut) = db::MetadataRepo::get(db.inner(), "lock_shortcut")
+        .ok().flatten()
+    {
+        let mut old = state.current_lock_shortcut.lock()
+            .map_err(|e| AppError::Other(format!("获取快捷键锁失败: {}", e)))?;
+        if *old != shortcut {
+            let _ = app_handle.global_shortcut().unregister(old.as_str());
+            let _ = app_handle.global_shortcut().register(shortcut.as_str());
+            *old = shortcut;
+        }
+    }
+    if let Some(shortcut) = db::MetadataRepo::get(db.inner(), "global_shortcut")
+        .ok().flatten()
+    {
+        let mut old = state.current_shortcut.lock()
+            .map_err(|e| AppError::Other(format!("获取快捷键锁失败: {}", e)))?;
+        if *old != shortcut {
+            let _ = app_handle.global_shortcut().unregister(old.as_str());
+            let _ = app_handle.global_shortcut().register(shortcut.as_str());
+            *old = shortcut;
+        }
+    }
 
     Ok(UnlockResult {
         success: true,
