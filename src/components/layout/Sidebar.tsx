@@ -16,6 +16,7 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
   const { filterType, filterByType } = useEntryStore()
   const [appName, setAppName] = useState('Vault Keeper')
   const [iconUrl, setIconUrl] = useState<string | null>(null)
+  const [lockShortcut, setLockShortcut] = useState('')
 
   useEffect(() => {
     getName().then(setAppName).catch(() => {})
@@ -33,6 +34,13 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
     }
   }, [])
 
+  // 加载锁定快捷键
+  useEffect(() => {
+    invoke<{ lock_shortcut?: string }>('get_app_config')
+      .then((config) => setLockShortcut(config.lock_shortcut || ''))
+      .catch(() => {})
+  }, [])
+
   const handleCategoryClick = (type: string | null) => {
     if (type === filterType) type = null
     filterByType(type)
@@ -42,11 +50,11 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
     <aside className="w-56 flex flex-col bg-surface-900 border-r border-surface-700/50">
       <div className="p-4 border-b border-surface-700/50">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center overflow-hidden">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
             {iconUrl ? (
               <img src={iconUrl} alt={appName} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-xs font-bold text-white">{appName.charAt(0)}</span>
+              <span className="text-xs font-bold text-surface-400">{appName.charAt(0)}</span>
             )}
           </div>
           <div>
@@ -84,10 +92,15 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
           <Settings size={16} />
           设置
         </Button>
-        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => lock()}>
-          <Lock size={16} />
-          锁定
-        </Button>
+        <div>
+          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => lock()}>
+            <Lock size={16} />
+            锁定
+          </Button>
+          {lockShortcut && (
+            <p className="text-[10px] text-surface-500 text-center mt-0.5">{lockShortcut}</p>
+          )}
+        </div>
       </div>
     </aside>
   )

@@ -14,6 +14,8 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 /// 默认全局快捷键
 const DEFAULT_SHORTCUT: &str = "CmdOrCtrl+Shift+V";
+/// 默认锁定快捷键
+const DEFAULT_LOCK_SHORTCUT: &str = "CmdOrCtrl+Shift+L";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -22,10 +24,20 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(move |app, _shortcut, event| {
-                    if event.state == ShortcutState::Pressed {
-                        toggle_main_window(app);
+                .with_handler(move |app, shortcut, event| {
+                    if event.state != ShortcutState::Pressed { return; }
+                    let shortcut_str = shortcut.to_string();
+                    // 检查是否锁定快捷键
+                    if let Some(state) = app.try_state::<AppState>() {
+                        if let Ok(lock_shortcut) = state.current_lock_shortcut.lock() {
+                            if shortcut_str == *lock_shortcut {
+                                let _ = state.keychain.lock();
+                                let _ = app.emit("vault-locked", ());
+                                return;
+                            }
+                        }
                     }
+                    toggle_main_window(app);
                 })
                 .build(),
         )
@@ -48,6 +60,7 @@ pub fn run() {
                 keychain: crypto::keychain::Keychain::new(),
                 db_dir: app_data_dir,
                 current_shortcut: Mutex::new(DEFAULT_SHORTCUT.to_string()),
+                current_lock_shortcut: Mutex::new(DEFAULT_LOCK_SHORTCUT.to_string()),
             });
 
             // ========== 关闭到 Dock ==========
@@ -124,6 +137,9 @@ pub fn run() {
             if let Err(e) = app.global_shortcut().register(DEFAULT_SHORTCUT) {
                 eprintln!("注册全局快捷键失败: {}", e);
             }
+            if let Err(e) = app.global_shortcut().register(DEFAULT_LOCK_SHORTCUT) {
+                eprintln!("注册锁定快捷键失败: {}", e);
+            }
 
             // ========== 后台自动备份定时器 ==========
             // 使用独立线程 + 自建 tokio runtime，因为 setup 阶段尚无全局 tokio runtime
@@ -199,8 +215,8 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
             continue;
         }
 
-        // 读取备份配置
-        let key = match state.keychain.get_key() {
+        // 读取备份配置（使用 peek_key 以免后台任务重置自动锁定计时器）
+        let key = match state.keychain.peek_key() {
             Ok(k) => k,
             Err(_) => continue,
         };

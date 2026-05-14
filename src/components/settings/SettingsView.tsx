@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Clock, Keyboard } from 'lucide-react'
+import { ArrowLeft, Clock, Keyboard, Lock, KeyRound } from 'lucide-react'
 import { invoke } from '@tauri-apps/api/core'
 import { Button } from '../common/Button'
 import { BackupSection } from './BackupSection'
 import { IcloudSection } from './IcloudSection'
 import { toast } from '../common/Toast'
+import type { AppConfig } from '../../types/common'
 
 interface SettingsViewProps {
   onBack: () => void
@@ -16,14 +17,25 @@ export function SettingsView({ onBack }: SettingsViewProps) {
   const [shortcut, setShortcut] = useState('CmdOrCtrl+Shift+V')
   const [shortcutInput, setShortcutInput] = useState('')
   const [savingShortcut, setSavingShortcut] = useState(false)
+  const [lockShortcut, setLockShortcut] = useState('CmdOrCtrl+Shift+L')
+  const [lockShortcutInput, setLockShortcutInput] = useState('')
+  const [savingLockShortcut, setSavingLockShortcut] = useState(false)
+
+  // 修改密码
+  const [oldPassword, setOldPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
 
   useEffect(() => {
     (async () => {
       try {
-        const config = await invoke<{ auto_lock_seconds: number; global_shortcut: string }>('get_app_config')
+        const config = await invoke<AppConfig>('get_app_config')
         setAutoLockMinutes(Math.round(config.auto_lock_seconds / 60))
         setShortcut(config.global_shortcut)
         setShortcutInput(config.global_shortcut)
+        setLockShortcut(config.lock_shortcut || 'CmdOrCtrl+Shift+L')
+        setLockShortcutInput(config.lock_shortcut || 'CmdOrCtrl+Shift+L')
       } catch { /* 使用默认值 */ }
       setLoadingConfig(false)
     })()
@@ -50,6 +62,44 @@ export function SettingsView({ onBack }: SettingsViewProps) {
       toast(`快捷键设置失败: ${e}`, 'error')
     }
     setSavingShortcut(false)
+  }
+
+  const handleLockShortcutSave = async () => {
+    setSavingLockShortcut(true)
+    try {
+      await invoke('update_app_config', { lockShortcut: lockShortcutInput })
+      setLockShortcut(lockShortcutInput)
+      toast(`锁定快捷键已设为 ${lockShortcutInput}`, 'success')
+    } catch (e) {
+      toast(`锁定快捷键设置失败: ${e}`, 'error')
+    }
+    setSavingLockShortcut(false)
+  }
+
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast('请填写所有密码字段', 'error')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast('两次输入的新密码不一致', 'error')
+      return
+    }
+    if (newPassword.length < 6) {
+      toast('新密码长度不能少于 6 位', 'error')
+      return
+    }
+    setChangingPassword(true)
+    try {
+      await invoke('change_master_password', { oldPassword, newPassword })
+      toast('主密码已修改成功', 'success')
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (e) {
+      toast(`修改失败: ${e}`, 'error')
+    }
+    setChangingPassword(false)
   }
 
   return (
@@ -102,14 +152,14 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         {/* iCloud 备份 */}
         <IcloudSection />
 
-        {/* 全局快捷键 */}
+        {/* 全局快捷键（唤出/隐藏） */}
         <div className="bg-surface-800/50 border border-surface-700/50 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Keyboard size={16} className="text-surface-400" />
-            <h3 className="text-sm font-medium text-surface-100">全局快捷键</h3>
+            <h3 className="text-sm font-medium text-surface-100">唤出快捷键</h3>
           </div>
           <p className="text-xs text-surface-500">设置全局快捷键快速唤出或隐藏 Vault Keeper 窗口</p>
-          <p className="text-xs text-surface-400">当前快捷键: <code className="bg-surface-900 px-1.5 py-0.5 rounded text-primary-400">{shortcut}</code></p>
+          <p className="text-xs text-surface-400">当前: <code className="bg-surface-900 px-1.5 py-0.5 rounded text-primary-400">{shortcut}</code></p>
           <div className="flex gap-2">
             <input
               value={shortcutInput}
@@ -121,7 +171,62 @@ export function SettingsView({ onBack }: SettingsViewProps) {
               {savingShortcut ? '保存中...' : '保存'}
             </Button>
           </div>
-          <p className="text-xs text-surface-500">快捷键格式: Modifier+Key，例如 CmdOrCtrl+Shift+V、CmdOrCtrl+Alt+L</p>
+        </div>
+
+        {/* 锁定快捷键 */}
+        <div className="bg-surface-800/50 border border-surface-700/50 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Lock size={16} className="text-surface-400" />
+            <h3 className="text-sm font-medium text-surface-100">锁定快捷键</h3>
+          </div>
+          <p className="text-xs text-surface-500">按下快捷键快速锁定保险箱，无需手动点击锁定</p>
+          <p className="text-xs text-surface-400">当前: <code className="bg-surface-900 px-1.5 py-0.5 rounded text-primary-400">{lockShortcut}</code></p>
+          <div className="flex gap-2">
+            <input
+              value={lockShortcutInput}
+              onChange={(e) => setLockShortcutInput(e.target.value)}
+              placeholder="例如: CmdOrCtrl+Shift+L"
+              className="flex-1 bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
+            />
+            <Button size="sm" onClick={handleLockShortcutSave} disabled={savingLockShortcut || lockShortcutInput === lockShortcut}>
+              {savingLockShortcut ? '保存中...' : '保存'}
+            </Button>
+          </div>
+        </div>
+
+        {/* 修改主密码 */}
+        <div className="bg-surface-800/50 border border-surface-700/50 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <KeyRound size={16} className="text-surface-400" />
+            <h3 className="text-sm font-medium text-surface-100">修改主密码</h3>
+          </div>
+          <p className="text-xs text-surface-500">修改保险箱的主密码，修改后需使用新密码解锁</p>
+          <div className="space-y-2">
+            <input
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="当前密码"
+              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="新密码"
+              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="确认新密码"
+              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <Button onClick={handleChangePassword} disabled={changingPassword}>
+              {changingPassword ? '修改中...' : '修改密码'}
+            </Button>
+          </div>
         </div>
 
         {/* 关于 */}

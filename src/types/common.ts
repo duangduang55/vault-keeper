@@ -26,4 +26,6 @@ export interface FieldDefinition {
 export interface AppConfig {
   auto_lock_seconds: number;
   theme: string;
+  global_shortcut: string;
+  lock_shortcut: string;
 }

@@ -11,6 +11,7 @@ pub struct AppConfig {
     pub auto_lock_seconds: u64,
     pub theme: String,
     pub global_shortcut: String,
+    pub lock_shortcut: String,
     pub auto_backup_interval: u64,
     pub last_icloud_backup: u64,
 }
@@ -37,6 +38,7 @@ pub async fn update_app_config(
     auto_lock_seconds: Option<u64>,
     theme: Option<String>,
     global_shortcut: Option<String>,
+    lock_shortcut: Option<String>,
     auto_backup_interval: Option<u64>,
     backup_password: Option<String>,
 ) -> Result<AppConfig, AppError> {
@@ -66,6 +68,17 @@ pub async fn update_app_config(
         *old = shortcut.clone();
     }
 
+    if let Some(ref shortcut) = lock_shortcut {
+        db::MetadataRepo::set(conn.inner(), "lock_shortcut", shortcut)?;
+
+        let mut old = state.current_lock_shortcut.lock().map_err(|e| {
+            AppError::Other(format!("获取锁定快捷键锁失败: {}", e))
+        })?;
+        let _ = app_handle.global_shortcut().unregister(old.as_str());
+        let _ = app_handle.global_shortcut().register(shortcut.as_str());
+        *old = shortcut.clone();
+    }
+
     if let Some(interval) = auto_backup_interval {
         db::MetadataRepo::set(conn.inner(), "auto_backup_interval", &interval.to_string())?;
     }
@@ -86,6 +99,8 @@ fn read_config_from_db(conn: &db::Connection) -> AppConfig {
         .ok().flatten().unwrap_or_else(|| "dark".to_string());
     let shortcut = db::MetadataRepo::get(conn.inner(), "global_shortcut")
         .ok().flatten().unwrap_or_else(|| "CmdOrCtrl+Shift+V".to_string());
+    let lock_shortcut = db::MetadataRepo::get(conn.inner(), "lock_shortcut")
+        .ok().flatten().unwrap_or_else(|| "CmdOrCtrl+Shift+L".to_string());
     let backup_interval = db::MetadataRepo::get(conn.inner(), "auto_backup_interval")
         .ok().flatten().unwrap_or_else(|| "0".to_string());
     let last_backup = db::MetadataRepo::get(conn.inner(), "last_icloud_backup")
@@ -95,6 +110,7 @@ fn read_config_from_db(conn: &db::Connection) -> AppConfig {
         auto_lock_seconds: auto_lock_str.parse().unwrap_or(300),
         theme,
         global_shortcut: shortcut,
+        lock_shortcut,
         auto_backup_interval: backup_interval.parse().unwrap_or(0),
         last_icloud_backup: last_backup.parse().unwrap_or(0),
     }

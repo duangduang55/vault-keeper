@@ -11,6 +11,7 @@ pub struct AppState {
     pub keychain: crypto::keychain::Keychain,
     pub db_dir: std::path::PathBuf,
     pub current_shortcut: std::sync::Mutex<String>,
+    pub current_lock_shortcut: std::sync::Mutex<String>,
 }
 
 /// 存储在加密库外的明文配置文件（仅含非敏感验证数据）

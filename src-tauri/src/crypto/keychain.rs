@@ -83,6 +83,25 @@ impl Keychain {
         }
     }
 
+    /// 获取密钥但不重置自动锁定计时器（用于后台任务如自动备份）
+    pub fn peek_key(&self) -> AppResult<[u8; 32]> {
+        // 检查自动锁定（可能触发锁定），但不标记用户活跃
+        self.check_auto_lock()?;
+
+        let key = self.key.lock().map_err(|e| {
+            AppError::LockState(format!("获取密钥锁失败: {}", e))
+        })?;
+
+        match key.as_ref() {
+            Some(k) => {
+                let mut result = [0u8; 32];
+                result.copy_from_slice(k.expose_secret());
+                Ok(result)
+            }
+            None => Err(AppError::LockState("密钥未加载".to_string())),
+        }
+    }
+
     /// 锁定保险箱（清除内存中的密钥）
     pub fn lock(&self) -> AppResult<()> {
         let mut key = self.key.lock().map_err(|e| {
