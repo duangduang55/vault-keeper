@@ -7,6 +7,7 @@ use std::sync::Mutex;
 use commands::auth::AppState;
 use tauri::Manager;
 use tauri::Emitter;
+use time::OffsetDateTime;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
@@ -262,7 +263,10 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
         let icloud_dir = commands::icloud::icloud_dir();
         std::fs::create_dir_all(&icloud_dir).ok();
 
-        let filename = format!("vault-keeper-backup-{}.bin", now);
+        let ts = OffsetDateTime::now_local()
+            .map(|t| format!("{:04}{:02}{:02}{:02}{:02}", t.year(), u8::from(t.month()), t.day(), t.hour(), t.minute()))
+            .unwrap_or_else(|_| now.to_string());
+        let filename = format!("vault-keeper-backup-{}.bin", ts);
         let path = icloud_dir.join(&filename);
         if let Err(e) = std::fs::write(&path, &encrypted) {
             log::warn!("iCloud 自动备份写入失败: {}", e);

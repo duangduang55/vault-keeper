@@ -10,6 +10,7 @@ interface AuthState {
 
   // 操作
   checkLockState: () => Promise<void>;
+  peekLockState: () => Promise<void>;
   setup: (password: string) => Promise<boolean>;
   unlock: (password: string) => Promise<boolean>;
   lock: () => Promise<void>;
@@ -36,6 +37,14 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: String(err),
       });
     }
+  },
+
+  /** 轻量检查锁状态（不设置 isLoading，用于自动锁定轮询） */
+  peekLockState: async () => {
+    try {
+      const result = await invoke<GetLockStateResult>('get_lock_state');
+      set({ lockState: result.lock_state as LockState });
+    } catch { /* 静默失败 */ }
   },
 
   setup: async (password: string) => {

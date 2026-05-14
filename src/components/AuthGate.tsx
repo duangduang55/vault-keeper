@@ -6,7 +6,7 @@ import { UnlockView } from './UnlockView';
 import { AppShell } from './layout/AppShell';
 
 export function AuthGate() {
-  const { lockState, isLoading, checkLockState } = useAuthStore();
+  const { lockState, isLoading, checkLockState, peekLockState } = useAuthStore();
 
   useEffect(() => {
     checkLockState();
@@ -17,6 +17,13 @@ export function AuthGate() {
     });
     return () => { unlisten.then((f) => f()) };
   }, [checkLockState]);
+
+  // 解锁状态下定期检查自动锁定（每 2 秒）
+  useEffect(() => {
+    if (lockState !== 'unlocked') return;
+    const interval = setInterval(peekLockState, 2000);
+    return () => clearInterval(interval);
+  }, [lockState, peekLockState]);
 
   // 加载中
   if (isLoading) {

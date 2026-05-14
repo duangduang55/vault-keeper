@@ -61,12 +61,13 @@ impl Keychain {
         Ok(())
     }
 
-    /// 获取密钥的引用（用于数据库操作等）
-    /// 返回使用后自动清理的守卫，但 Secret 不会离开锁
-    /// 实际使用时通过 with_key 模式访问
+    /// 获取密钥（用于数据库操作等）
+    /// 先检查自动锁定，再标记用户活跃
     pub fn get_key(&self) -> AppResult<[u8; 32]> {
         // 先检查自动锁定，避免在持有 key 锁时调用 lock() 导致死锁
         self.check_auto_lock()?;
+        // 能走到这里说明未超时锁定，标记用户活跃以重置计时器
+        self.mark_activity()?;
 
         let key = self.key.lock().map_err(|e| {
             AppError::LockState(format!("获取密钥锁失败: {}", e))
@@ -143,6 +144,7 @@ impl Keychain {
     }
 
     /// 检查是否超过自动锁定时间，如果是则自动锁定
+    /// 与 mark_activity 分离：本方法只检查不重置计时器
     pub fn check_auto_lock(&self) -> AppResult<()> {
         let state = self.lock_state.lock().map_err(|e| {
             AppError::LockState(format!("获取状态锁失败: {}", e))
@@ -153,7 +155,7 @@ impl Keychain {
         }
         drop(state);
 
-        let mut unlocked = self.unlocked_at.lock().map_err(|e| {
+        let unlocked = self.unlocked_at.lock().map_err(|e| {
             AppError::LockState(format!("获取时间锁失败: {}", e))
         })?;
 
@@ -166,12 +168,21 @@ impl Keychain {
                 drop(unlocked);
                 drop(auto_lock);
                 self.lock()?;
-            } else {
-                // 用户活跃中，重置自动锁定计时器
-                *unlocked = Some(Instant::now());
             }
+            // 不重置计时器 — 由 mark_activity 负责
         }
 
+        Ok(())
+    }
+
+    /// 标记用户活跃，重置自动锁定计时器
+    pub fn mark_activity(&self) -> AppResult<()> {
+        let mut unlocked = self.unlocked_at.lock().map_err(|e| {
+            AppError::LockState(format!("获取时间锁失败: {}", e))
+        })?;
+        if unlocked.is_some() {
+            *unlocked = Some(Instant::now());
+        }
         Ok(())
     }
 }
