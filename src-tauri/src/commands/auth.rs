@@ -162,6 +162,9 @@ pub async fn lock(state: State<'_, AppState>) -> Result<LockResult, AppError> {
 /// 获取锁定状态
 #[tauri::command]
 pub async fn get_lock_state(state: State<'_, AppState>) -> Result<GetLockStateResult, AppError> {
+    // 先检查自动锁定（窗口隐藏后时间到了也应锁定）
+    state.keychain.check_auto_lock()?;
+
     let ls = state.keychain.get_lock_state()?;
     let state_str = match ls {
         LockState::Uninitialized => {

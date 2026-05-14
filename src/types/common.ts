@@ -19,6 +19,7 @@ export interface FieldDefinition {
   type: 'text' | 'password' | 'url' | 'date';
   required: boolean;
   placeholder?: string;
+  multiline?: boolean;
 }
 
 /** 应用配置 */

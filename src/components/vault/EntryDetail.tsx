@@ -32,6 +32,11 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
     return template?.fields.find((f) => f.key === key)?.label ?? key
   }
 
+  const isMultilineField = (key: string, value: string): boolean => {
+    if (value.includes('\n')) return true
+    return template?.fields.some((f) => f.key === key && f.multiline) ?? false
+  }
+
   const handleDelete = async () => {
     setDeleting(true)
     const ok = await deleteEntry(entry.id)
@@ -98,7 +103,7 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
                       )}
                     </div>
                   </div>
-                  <p className={`text-sm font-mono break-all ${visible ? 'text-surface-100' : 'text-surface-100/30 select-none'}`}>
+                  <p className={`text-sm ${isMultilineField(key, value) ? 'whitespace-pre-wrap' : 'font-mono break-all'} ${visible ? 'text-surface-100' : 'text-surface-100/30 select-none'}`}>
                     {visible ? value : '•'.repeat(Math.min(value.length, 20))}
                   </p>
                 </div>

@@ -143,7 +143,7 @@ impl Keychain {
     }
 
     /// 检查是否超过自动锁定时间，如果是则自动锁定
-    fn check_auto_lock(&self) -> AppResult<()> {
+    pub fn check_auto_lock(&self) -> AppResult<()> {
         let state = self.lock_state.lock().map_err(|e| {
             AppError::LockState(format!("获取状态锁失败: {}", e))
         })?;

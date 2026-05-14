@@ -5,7 +5,7 @@ import { Input } from '../common/Input'
 import { useEntryStore } from '../../stores/entryStore'
 import { CATEGORY_TEMPLATES, getTemplate } from '../../lib/templates'
 import type { Entry, CreateEntryParams } from '../../types/entry'
-import type { EntryType } from '../../types/common'
+import type { EntryType, FieldDefinition } from '../../types/common'
 import { toast } from '../common/Toast'
 import { PasswordGenerator } from './PasswordGenerator'
 
@@ -22,6 +22,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
   const [saving, setSaving] = useState(false)
   const [showGenerator, setShowGenerator] = useState(false)
   const [targetField, setTargetField] = useState<string | null>(null)
+  const [multilineFields, setMultilineFields] = useState<Set<string>>(new Set())
 
   const template = type ? getTemplate(type as EntryType) : null
   const isEdit = !!editEntry
@@ -33,6 +34,24 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
       } catch { setFields({}) }
     }
   }, [editEntry])
+
+  // 根据模板初始化多行字段状态
+  useEffect(() => {
+    if (template) {
+      setMultilineFields(new Set(template.fields.filter(f => f.multiline).map(f => f.key)))
+    }
+  }, [template])
+
+  const canHaveMultiline = (f: FieldDefinition) => f.type !== 'password'
+
+  const toggleMultiline = (key: string) => {
+    setMultilineFields(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   const handleSubmit = async () => {
     if (!name.trim()) return
@@ -106,64 +125,123 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                 />
               ))}
 
-              {template.fields.filter((f) => f.key !== 'name').map((f) => (
-                <div key={f.key} className="relative">
-                  <Input
-                    label={f.label}
-                    type={f.type}
-                    value={fields[f.key] ?? ''}
-                    onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                    placeholder={f.placeholder}
-                    required={f.required}
-                  />
-                  {f.type === 'password' && (
-                    <button
-                      type="button"
-                      onClick={() => { setTargetField(f.key); setShowGenerator(true) }}
-                      className="absolute right-10 bottom-2 text-[11px] text-primary-400 hover:text-primary-300"
-                    >
-                      生成
-                    </button>
-                  )}
-                </div>
-              ))}
+              {template.fields.filter((f) => f.key !== 'name').map((f) => {
+                const isMultiline = multilineFields.has(f.key)
+                const canToggle = canHaveMultiline(f)
+                return (
+                  <div key={f.key} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-surface-300">{f.label}</label>
+                      {canToggle && (
+                        <button
+                          type="button"
+                          onClick={() => toggleMultiline(f.key)}
+                          className="text-[11px] text-primary-400 hover:text-primary-300"
+                        >
+                          {isMultiline ? '单行' : '多行'}
+                        </button>
+                      )}
+                    </div>
+                    {isMultiline ? (
+                      <textarea
+                        value={fields[f.key] ?? ''}
+                        onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                        placeholder={f.placeholder}
+                        rows={4}
+                        className="w-full px-3 py-2 rounded-lg bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y min-h-[80px]"
+                      />
+                    ) : (
+                      <div className="relative">
+                        <Input
+                          type={f.type}
+                          value={fields[f.key] ?? ''}
+                          onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                          placeholder={f.placeholder}
+                          required={f.required}
+                        />
+                        {f.type === 'password' && (
+                          <button
+                            type="button"
+                            onClick={() => { setTargetField(f.key); setShowGenerator(true) }}
+                            className="absolute right-10 bottom-2 text-[11px] text-primary-400 hover:text-primary-300"
+                          >
+                            生成
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
 
               {type === 'custom' && (
                 <div className="space-y-2">
-                  {Object.entries(fields).filter(([k]) => k !== 'name').map(([key, val], idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <Input
-                        label="字段名"
-                        value={key}
-                        onChange={(e) => {
-                          const newFields = { ...fields }
-                          delete newFields[key]
-                          newFields[e.target.value] = val
-                          setFields(newFields)
-                        }}
-                        className="w-1/3"
-                      />
-                      <div className="flex-1">
+                  {Object.entries(fields).filter(([k]) => k !== 'name').map(([key, val], idx) => {
+                    const multilineKey = `custom_${idx}`
+                    const isMultiline = multilineFields.has(multilineKey)
+                    return (
+                      <div key={idx} className="flex gap-2 items-start">
                         <Input
-                          label="值"
-                          value={val}
-                          onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
-                          className="w-full"
+                          label="字段名"
+                          value={key}
+                          onChange={(e) => {
+                            const newKey = e.target.value
+                            const newFields = { ...fields }
+                            delete newFields[key]
+                            newFields[newKey] = val
+                            setFields(newFields)
+                            // 同步多行状态
+                            setMultilineFields(prev => {
+                              const next = new Set(prev)
+                              if (next.has(multilineKey)) {
+                                next.delete(multilineKey)
+                                next.add(`custom_${idx}`)
+                              }
+                              return next
+                            })
+                          }}
+                          className="w-1/3"
                         />
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-sm font-medium text-surface-300">值</label>
+                            <button
+                              type="button"
+                              onClick={() => toggleMultiline(multilineKey)}
+                              className="text-[11px] text-primary-400 hover:text-primary-300"
+                            >
+                              {isMultiline ? '单行' : '多行'}
+                            </button>
+                          </div>
+                          {isMultiline ? (
+                            <textarea
+                              value={val}
+                              onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
+                              rows={3}
+                              className="w-full px-3 py-2 rounded-lg bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y min-h-[60px]"
+                            />
+                          ) : (
+                            <Input
+                              value={val}
+                              onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
+                              className="w-full"
+                            />
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newFields = { ...fields }
+                            delete newFields[key]
+                            setFields(newFields)
+                          }}
+                          className="text-surface-500 hover:text-red-400 pt-6"
+                        >
+                          ✕
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newFields = { ...fields }
-                          delete newFields[key]
-                          setFields(newFields)
-                        }}
-                        className="self-end text-surface-500 hover:text-red-400 pb-2"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
+                    )
+                  })}
                   <Button variant="ghost" size="sm" onClick={() => setFields((prev) => ({ ...prev, ['']: '' }))}>
                     + 添加字段
                   </Button>
