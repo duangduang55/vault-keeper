@@ -10,7 +10,7 @@ use tauri::Emitter;
 use time::OffsetDateTime;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState, Shortcut};
 
 /// 默认全局快捷键
 const DEFAULT_SHORTCUT: &str = "CmdOrCtrl+Shift+V";
@@ -26,17 +26,14 @@ pub fn run() {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app, shortcut, event| {
                     if event.state != ShortcutState::Pressed { return; }
-                    let shortcut_str = shortcut.to_string();
-                    // macOS 上 CmdOrCtrl 会被解析为 Cmd/Command，需要归一化后再比较
-                    let normalized = shortcut_str
-                        .replacen("Command+", "CmdOrCtrl+", 1)
-                        .replacen("Cmd+", "CmdOrCtrl+", 1);
                     if let Some(state) = app.try_state::<AppState>() {
                         if let Ok(lock_shortcut) = state.current_lock_shortcut.lock() {
-                            if normalized == *lock_shortcut {
-                                let _ = state.keychain.lock();
-                                let _ = app.emit("vault-locked", ());
-                                return;
+                            if let Ok(lock_hotkey) = lock_shortcut.as_str().parse::<Shortcut>() {
+                                if shortcut == &lock_hotkey {
+                                    let _ = state.keychain.lock();
+                                    let _ = app.emit("vault-locked", ());
+                                    return;
+                                }
                             }
                         }
                     }
