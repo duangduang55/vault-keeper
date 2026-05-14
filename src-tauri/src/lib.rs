@@ -26,24 +26,17 @@ pub fn run() {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(move |app, shortcut, event| {
                     if event.state != ShortcutState::Pressed { return; }
-                    eprintln!("[shortcut] pressed: {:?} id={}", shortcut, shortcut.id());
                     if let Some(state) = app.try_state::<AppState>() {
                         if let Ok(lock_shortcut) = state.current_lock_shortcut.lock() {
-                            eprintln!("[shortcut] lock_shortcut_str: {:?}", *lock_shortcut);
                             if let Ok(lock_hotkey) = lock_shortcut.as_str().parse::<Shortcut>() {
-                                eprintln!("[shortcut] lock_hotkey: {:?} id={}", lock_hotkey, lock_hotkey.id());
                                 if shortcut == &lock_hotkey {
-                                    eprintln!("[shortcut] MATCH! locking...");
                                     let _ = state.keychain.lock();
                                     let _ = app.emit("vault-locked", ());
                                     return;
                                 }
-                            } else {
-                                eprintln!("[shortcut] parse failed for lock_shortcut");
                             }
                         }
                     }
-                    eprintln!("[shortcut] fallback -> toggle_main_window");
                     toggle_main_window(app);
                 })
                 .build(),
