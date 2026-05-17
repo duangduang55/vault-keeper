@@ -64,10 +64,10 @@ npm run tauri build
 ```bash
 npm run dev              # 仅前端开发（浏览器）
 npm run tauri dev        # 完整桌面应用开发模式
-npm run build            # 前端构建
+npm run build            # 前端构建（TypeScript + Vite）
 npm run tauri build      # 打包桌面应用（macOS DMG）
-npm run typecheck        # TypeScript 类型检查
 npm run lint             # ESLint 检查
+npx tsc -b config/tsconfig.json  # TypeScript 类型检查
 
 cd src-tauri && cargo check   # Rust 快速类型检查
 cd src-tauri && cargo test    # 运行 Rust 测试
@@ -88,6 +88,13 @@ cd src-tauri && cargo clippy  # Rust lint 检查
 
 ```
 vault-keeper/
+├── config/                     # 项目配置文件
+│   ├── vite.config.ts          #   Vite 构建配置
+│   ├── eslint.config.js        #   ESLint 配置
+│   ├── tailwind.config.js      #   Tailwind CSS 配置
+│   ├── postcss.config.js       #   PostCSS 配置
+│   └── tsconfig*.json          #   TypeScript 配置
+├── public/                     # 静态资源
 ├── src/                        # React 前端
 │   ├── components/             #   组件（通用、布局、保险箱、表单、设置）
 │   ├── stores/                 #   Zustand 状态管理
@@ -95,13 +102,22 @@ vault-keeper/
 │   └── lib/                    #   工具函数
 ├── src-tauri/                  # Rust 后端
 │   └── src/
-│       ├── commands/           #   Tauri 命令（28 个）
+│       ├── commands/           #   Tauri 命令
 │       ├── crypto/             #   加密模块（Argon2, AES-256-GCM, Keychain）
 │       └── db/                 #   数据库（SQLCipher, 迁移, CRUD）
-├── public/                     # 静态资源
+├── index.html
 ├── package.json
 └── README.md
 ```
+
+### 目录结构约定
+
+| 目录 | 用途 |
+|------|------|
+| 目录 | 用途 |
+|------|------|
+| `config/` | 项目配置文件 |
+| `src/` | 源代码 |
 
 ---
 

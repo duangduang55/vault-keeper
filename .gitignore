@@ -44,7 +44,14 @@ Thumbs.db
 .vite-temp
 .vite
 
-# AI planning docs (keep local, not for GitHub)
+# AI planning docs & harness artifacts (keep local, not for GitHub)
 team-work/
 docs/
-HARNESS_PROGRESS.md
+harness/
+
+# Claude Code local config
+.claude/
+CLAUDE.md
+
+# Runtime logs
+logs/
