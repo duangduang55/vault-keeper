@@ -121,7 +121,8 @@ export const useEntryStore = create<EntryState>((set, get) => ({
 
   filterByType: async (entryType) => {
     try {
-      set({ isLoading: true, error: null, filterType: entryType });
+      const categoryChanged = entryType !== get().filterType;
+      set({ isLoading: true, error: null, filterType: entryType, selectedEntry: categoryChanged ? null : get().selectedEntry });
       if (!entryType) {
         await get().loadEntries();
         return;
