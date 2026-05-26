@@ -22,16 +22,16 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className={`relative w-full ${sizeClasses[size]} mx-4 bg-surface-800 border border-surface-700 rounded-xl shadow-2xl`}>
-        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-700">
-          <h2 className="text-lg font-semibold text-surface-100">{title}</h2>
-          <button onClick={onClose} className="text-surface-400 hover:text-surface-200 transition-colors">
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={onClose} />
+      <div className={`relative w-full ${sizeClasses[size]} bg-surface-900 border border-surface-800 rounded-[14px] shadow-xl animate-scale-in`}>
+        <div className="flex items-center justify-between px-5 py-4">
+          <h2 className="text-base font-semibold text-surface-100">{title}</h2>
+          <button onClick={onClose} className="p-1 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-800 transition-colors">
+            <X size={18} />
           </button>
         </div>
-        <div className="p-5 max-h-[70vh] overflow-y-auto">
+        <div className="px-5 pb-5 max-h-[70vh] overflow-y-auto">
           {children}
         </div>
       </div>

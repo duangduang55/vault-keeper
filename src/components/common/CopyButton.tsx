@@ -26,7 +26,7 @@ export function CopyButton({ entryId, fieldKey }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className="p-1.5 rounded-md text-surface-500 hover:text-surface-200 hover:bg-surface-700 transition-colors"
+      className="p-1.5 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-700 transition-all duration-200 active:scale-90"
       title="复制"
     >
       {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}

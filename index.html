@@ -7,6 +7,20 @@
     <title>Vault Keeper</title>
   </head>
   <body>
+    <script>
+      // 防闪烁：在 React 加载之前从 localStorage 读取主题并应用
+      (function() {
+        var theme = localStorage.getItem('vault-keeper-theme');
+        if (theme === 'dark' || theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else if (theme !== 'light') {
+          // 默认：跟随系统
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

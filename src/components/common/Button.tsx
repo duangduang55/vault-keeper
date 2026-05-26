@@ -10,24 +10,36 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus:ring-primary-500',
-  secondary: 'bg-surface-700 text-surface-200 hover:bg-surface-600 active:bg-surface-500 focus:ring-surface-500',
-  ghost: 'text-surface-400 hover:text-surface-100 hover:bg-surface-800 focus:ring-surface-500',
-  danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus:ring-red-500',
+  primary:
+    'bg-primary-500 text-white hover:bg-primary-400 active:bg-primary-600',
+  secondary:
+    'bg-surface-800 text-surface-100 hover:bg-surface-700 active:bg-surface-600 border border-surface-600',
+  ghost:
+    'text-surface-300 hover:text-surface-100 hover:bg-surface-800 active:bg-surface-700',
+  danger:
+    'bg-red-500 text-white hover:bg-red-400 active:bg-red-600',
 }
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'px-2.5 py-1.5 text-xs',
+  sm: 'px-3 py-1.5 text-xs',
   md: 'px-4 py-2 text-sm',
   lg: 'px-5 py-2.5 text-base',
 }
 
-export function Button({ variant = 'primary', size = 'md', className = '', children, disabled, ...props }: ButtonProps) {
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  className = '',
+  children,
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-900
-        disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150
+      className={`inline-flex items-center justify-center gap-2 rounded-[10px] font-medium
+        focus:outline-none focus:ring-2 focus:ring-primary-500/50
+        disabled:opacity-40 disabled:cursor-not-allowed
+        transition-all duration-200 ease-out active:scale-[0.97]
         ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       disabled={disabled}
       {...props}

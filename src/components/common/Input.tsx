@@ -23,11 +23,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             type={actualType}
-            className={`w-full px-3 py-2 rounded-lg bg-surface-800 border text-surface-100
+            className={`w-full px-3 py-2 rounded-[10px] bg-surface-800 border text-surface-100 text-sm
               placeholder:text-surface-500
               focus:outline-none focus:ring-2 focus:border-transparent
-              disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150
-              ${error ? 'border-red-500 focus:ring-red-500' : 'border-surface-700 focus:ring-primary-500'}
+              disabled:opacity-40 disabled:cursor-not-allowed
+              transition-all duration-200
+              ${error ? 'border-red-500 focus:ring-red-500/50' : 'border-surface-600 focus:ring-primary-500/50'}
               ${isPassword ? 'pr-10' : ''} ${className}`}
             {...props}
           />
@@ -35,7 +36,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-200"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-200 transition-colors"
               tabIndex={-1}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

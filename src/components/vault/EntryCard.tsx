@@ -10,7 +10,6 @@ interface EntryCardProps {
   onSelect: (entry: Entry) => void
 }
 
-/** 判断字段是否为敏感字段（不应在卡片预览中显示） */
 function isSensitiveField(entryType: string, key: string, allFields: Record<string, string>): boolean {
   if (key === '_sensitive') return true
   const template = getTemplate(entryType as EntryType)
@@ -18,24 +17,20 @@ function isSensitiveField(entryType: string, key: string, allFields: Record<stri
     const def = template.fields.find(f => f.key === key)
     if (def) return def.type === 'password'
   }
-  // 自定义字段：检查 _sensitive 元数据
   if (allFields['_sensitive']) {
     const sensitiveKeys = allFields['_sensitive'].split(',').map(s => s.trim())
     if (sensitiveKeys.includes(key)) return true
   }
-  // 回退启发式
   const k = key.toLowerCase()
   return k.includes('pass') || k.includes('secret') || k.includes('key') || k.includes('token')
 }
 
-/** 获取条目的主关键字段名（供复制按钮使用） */
 function getPrimarySecretKey(entryType: string, allFields: Record<string, string>): string | null {
   const template = getTemplate(entryType as EntryType)
   if (template) {
     const pwField = template.fields.find(f => f.type === 'password')
     if (pwField) return pwField.key
   }
-  // 自定义条目：取第一个 _sensitive 标记的字段
   const sensitiveKeys = allFields['_sensitive']?.split(',').map(s => s.trim()) ?? []
   for (const key of Object.keys(allFields)) {
     if (key === '_sensitive') continue
@@ -56,20 +51,23 @@ export function EntryCard({ entry, selected, onSelect }: EntryCardProps) {
   const primaryKey = getPrimarySecretKey(entry.entry_type, fields)
 
   return (
-    <button
+    <div
       onClick={() => onSelect(entry)}
-      className={`w-full text-left p-4 rounded-xl border transition-all duration-150
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(entry) } }}
+      role="button"
+      tabIndex={0}
+      className={`w-full text-left p-3.5 rounded-[10px] border transition-all duration-200 cursor-pointer
         ${selected
-          ? 'border-primary-500/50 bg-primary-600/5 shadow-sm shadow-primary-500/5'
-          : 'border-surface-700/50 bg-surface-800/50 hover:border-surface-600 hover:bg-surface-800'
+          ? 'border-primary-500/40 bg-primary-500/8'
+          : 'border-surface-800 bg-surface-800 hover:border-surface-600 hover:bg-surface-800/80'
         }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-0.5">
             <span className="text-[11px] font-medium uppercase tracking-wider text-primary-400">{label}</span>
           </div>
-          <h3 className="font-medium text-surface-100 truncate">{entry.name}</h3>
+          <h3 className="text-[15px] font-medium text-surface-100 truncate">{entry.name}</h3>
           <div className="flex items-center justify-between gap-2 mt-1">
             <span className="text-xs text-surface-500 truncate">{preview}</span>
             {primaryKey && (
@@ -79,8 +77,8 @@ export function EntryCard({ entry, selected, onSelect }: EntryCardProps) {
             )}
           </div>
         </div>
-        <span className="text-[11px] text-surface-500 whitespace-nowrap shrink-0">{formatDate(entry.updated_at)}</span>
+        <span className="text-[11px] text-surface-500 whitespace-nowrap shrink-0 mt-0.5">{formatDate(entry.updated_at)}</span>
       </div>
-    </button>
+    </div>
   )
 }

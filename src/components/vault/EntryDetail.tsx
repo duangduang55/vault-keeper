@@ -1,4 +1,4 @@
-import { X, Edit3, Trash2 } from 'lucide-react'
+import { X, Edit3, Trash2, Eye, EyeOff } from 'lucide-react'
 import type { Entry } from '../../types/entry'
 import type { EntryType } from '../../types/common'
 import { formatDate } from '../../lib/formatters'
@@ -17,17 +17,14 @@ interface EntryDetailProps {
 }
 
 function isPasswordField(template: CategoryTemplate | undefined, key: string, allFields?: Record<string, string>): boolean {
-  // 优先使用模板字段类型定义
   if (template) {
     const def = template.fields.find(f => f.key === key)
     if (def) return def.type === 'password'
   }
-  // 自定义字段：检查 _sensitive 元数据
   if (allFields?.['_sensitive']) {
     const sensitiveKeys = allFields['_sensitive'].split(',').map(s => s.trim())
     if (sensitiveKeys.includes(key)) return true
   }
-  // 回退到启发式判断
   const k = key.toLowerCase()
   return k.includes('pass') || k.includes('secret') || k.includes('key') || k.includes('token')
 }
@@ -74,9 +71,9 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-surface-700/50">
-          <h3 className="text-sm font-medium text-surface-100 truncate flex-1">{entry.name}</h3>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-surface-800">
+          <h3 className="text-[15px] font-medium text-surface-100 truncate flex-1">{entry.name}</h3>
+          <div className="flex items-center gap-0.5">
             <Button variant="ghost" size="sm" onClick={onEdit}>
               <Edit3 size={15} />
             </Button>
@@ -89,18 +86,18 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
           <div className="space-y-1">
-            <p className="text-[11px] text-surface-500 uppercase tracking-wider">分类</p>
+            <p className="text-[11px] text-surface-400 uppercase tracking-wider">分类</p>
             <p className="text-sm text-surface-200">{getCategoryLabel(entry.entry_type)}</p>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-[11px] text-surface-500 uppercase tracking-wider">字段</p>
+          <div className="space-y-2.5">
+            <p className="text-[11px] text-surface-400 uppercase tracking-wider">字段</p>
             {Object.entries(fields).filter(([k]) => k !== '_sensitive').map(([key, value]) => {
               const visible = visibleFields.has(key) || !isPasswordField(template, key, fields)
               return (
-                <div key={key} className="bg-surface-800 rounded-lg p-3 border border-surface-700/50">
+                <div key={key} className="bg-surface-800 rounded-[10px] p-3 border border-surface-700">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-surface-400">{getFieldLabel(key)}</span>
                     <div className="flex items-center gap-1">
@@ -108,14 +105,14 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
                       {isPasswordField(template, key, fields) && value.length > 0 && (
                         <button
                           onClick={() => toggleVisibility(key)}
-                          className="p-1 rounded text-surface-500 hover:text-surface-200 transition-colors"
+                          className="p-1 rounded text-surface-400 hover:text-surface-100 hover:bg-surface-700 transition-all duration-200 active:scale-90"
                         >
-                          {visible ? '🙈' : '👁️'}
+                          {visible ? <EyeOff size={14} /> : <Eye size={14} />}
                         </button>
                       )}
                     </div>
                   </div>
-                  <p className={`text-sm ${isMultilineField(key, value) ? 'whitespace-pre-wrap' : 'font-mono break-all'} ${visible ? 'text-surface-100' : 'text-surface-100/30 select-none'}`}>
+                  <p className={`text-sm ${isMultilineField(key, value) ? 'whitespace-pre-wrap' : 'font-mono break-all'} ${visible ? 'text-surface-100' : 'text-surface-100/20 select-none'}`}>
                     {visible ? value : '•'.repeat(Math.min(value.length, 20))}
                   </p>
                 </div>
@@ -123,7 +120,7 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
             })}
           </div>
 
-          <div className="border-t border-surface-700/50 pt-3 space-y-2">
+          <div className="border-t border-surface-800 pt-3 space-y-1.5">
             <div className="flex justify-between text-xs">
               <span className="text-surface-500">创建时间</span>
               <span className="text-surface-400">{formatDate(entry.created_at)}</span>

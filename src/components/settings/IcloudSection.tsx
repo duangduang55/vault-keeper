@@ -33,7 +33,6 @@ export function IcloudSection() {
   useEffect(() => {
     invoke<IcloudStatus>('get_icloud_status').then(setStatus).catch(() => {})
 
-    // 监听来自托盘菜单的 iCloud 备份事件
     const unlisten = listen('trigger-icloud-backup', () => {
       setShowBackup(true)
     })
@@ -112,22 +111,23 @@ export function IcloudSection() {
       const config = await invoke<{ auto_backup_interval: number }>('get_app_config')
       setBackupInterval(String(config.auto_backup_interval))
       setConfigLoaded(true)
-    } catch { /* 使用默认值 */ }
+    } catch { /* use defaults */ }
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadConfig()
   }, [])
 
   return (
     <>
-      <div className="bg-surface-800/50 border border-surface-700/50 rounded-xl p-4 space-y-3">
+      <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Cloud size={16} className="text-surface-400" />
           <h3 className="text-sm font-medium text-surface-100">iCloud 备份</h3>
           {status && (
-            <span className={`ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${status.available ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${status.available ? 'bg-green-400' : 'bg-yellow-400'}`} />
+            <span className={`ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${status.available ? 'bg-green-500/10 text-green-400' : 'bg-orange-500/10 text-orange-400'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${status.available ? 'bg-green-400' : 'bg-orange-400'}`} />
               {status.available ? '可用' : '不可用'}
             </span>
           )}
@@ -151,7 +151,7 @@ export function IcloudSection() {
             <select
               value={backupInterval}
               onChange={(e) => handleIntervalChange(e.target.value)}
-              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-200 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
             >
               <option value="0">关闭</option>
               <option value="3600">每小时</option>
@@ -160,9 +160,9 @@ export function IcloudSection() {
             </select>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* 手动备份弹窗 */}
+      {/* Manual Backup Modal */}
       <Modal open={showBackup} onClose={() => { setShowBackup(false); setBackupPassword('') }} title="iCloud 手动备份" size="sm">
         <div className="space-y-4">
           <Input label="备份密码" type="password" value={backupPassword} onChange={(e) => setBackupPassword(e.target.value)} placeholder="设置备份加密密码" />
@@ -174,7 +174,7 @@ export function IcloudSection() {
         </div>
       </Modal>
 
-      {/* 从 iCloud 恢复弹窗 */}
+      {/* Restore Modal */}
       <Modal open={showRestore} onClose={() => { setShowRestore(false); setRestorePassword(''); setSelectedFile('') }} title="从 iCloud 恢复" size="sm">
         <div className="space-y-4">
           <div>
@@ -187,9 +187,9 @@ export function IcloudSection() {
                   <button
                     key={f.filename}
                     onClick={() => setSelectedFile(f.filename)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-[8px] text-xs transition-colors ${
                       selectedFile === f.filename
-                        ? 'bg-primary-600/10 text-primary-400 border border-primary-500/30'
+                        ? 'bg-primary-500/10 text-primary-400 border border-primary-500/30'
                         : 'text-surface-300 hover:bg-surface-700/50 border border-transparent'
                     }`}
                   >
@@ -200,7 +200,7 @@ export function IcloudSection() {
               )}
             </div>
             {backupFiles.length > 0 && (
-              <button onClick={loadBackupFiles} className="flex items-center gap-1 text-[10px] text-primary-400 hover:text-primary-300 mt-1">
+              <button onClick={loadBackupFiles} className="flex items-center gap-1 text-[10px] text-primary-400 hover:text-primary-300 mt-1 transition-colors">
                 <RefreshCw size={10} />
                 刷新列表
               </button>

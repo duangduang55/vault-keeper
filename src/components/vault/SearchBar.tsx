@@ -43,17 +43,17 @@ export function SearchBar({ onAdd }: SearchBarProps) {
   }, [])
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-surface-700/50 bg-surface-900/50">
+    <div className="flex items-center gap-3 px-4 py-2.5">
       <div className="flex-1 relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500" />
+        <Search size= {16} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400" />
         <input
           ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="搜索条目... (⌘F)"
-          className="w-full pl-9 pr-3 py-2 rounded-lg bg-surface-800 border border-surface-700 text-surface-100
-            placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+          className="w-full pl-9 pr-3 py-2 rounded-[10px] bg-surface-800 border border-surface-600 text-surface-100
+            placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent transition-all duration-200"
         />
       </div>
 
@@ -65,10 +65,10 @@ export function SearchBar({ onAdd }: SearchBarProps) {
         {showFilter && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setShowFilter(false)} />
-            <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-surface-800 border border-surface-700 rounded-lg shadow-xl py-1">
+            <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-surface-800 border border-surface-700 rounded-[10px] shadow-xl py-1 animate-scale-in">
               <button
                 onClick={() => { filterByType(null); setShowFilter(false) }}
-                className={`w-full text-left px-3 py-2 text-sm ${!filterType ? 'text-primary-400 bg-primary-600/10' : 'text-surface-300 hover:bg-surface-700'}`}
+                className={`w-full text-left px-3 py-2 text-sm ${!filterType ? 'text-primary-400 bg-primary-500/10' : 'text-surface-300 hover:bg-surface-700'}`}
               >
                 全部
               </button>
@@ -76,7 +76,7 @@ export function SearchBar({ onAdd }: SearchBarProps) {
                 <button
                   key={t.type}
                   onClick={() => { filterByType(t.type); setShowFilter(false) }}
-                  className={`w-full text-left px-3 py-2 text-sm ${filterType === t.type ? 'text-primary-400 bg-primary-600/10' : 'text-surface-300 hover:bg-surface-700'}`}
+                  className={`w-full text-left px-3 py-2 text-sm ${filterType === t.type ? 'text-primary-400 bg-primary-500/10' : 'text-surface-300 hover:bg-surface-700'}`}
                 >
                   {t.label}
                 </button>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react'
 
-type ToastType = 'success' | 'error' | 'warning'
+export type ToastType = 'success' | 'error' | 'warning'
 
 interface ToastData {
   id: number
@@ -12,6 +12,7 @@ interface ToastData {
 let toastId = 0
 let addToastFn: ((t: ToastData) => void) | null = null
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function toast(message: string, type: ToastType = 'success') {
   addToastFn?.({ id: ++toastId, message, type })
 }
@@ -19,7 +20,7 @@ export function toast(message: string, type: ToastType = 'success') {
 const icons = {
   success: { icon: CheckCircle, color: 'text-green-400' },
   error: { icon: XCircle, color: 'text-red-400' },
-  warning: { icon: AlertTriangle, color: 'text-yellow-400' },
+  warning: { icon: AlertTriangle, color: 'text-orange-400' },
 }
 
 export function ToastContainer() {
@@ -42,11 +43,14 @@ export function ToastContainer() {
         return (
           <div
             key={t.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border border-surface-700 bg-surface-800 min-w-[260px] animate-slide-up`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-[10px] bg-surface-800 border border-surface-800 min-w-[280px] shadow-lg animate-slide-up`}
           >
             <Icon size={18} className={color} />
             <span className="text-sm text-surface-200 flex-1">{t.message}</span>
-            <button onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))} className="text-surface-500 hover:text-surface-300">
+            <button
+              onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+              className="p-0.5 text-surface-500 hover:text-surface-300 transition-colors"
+            >
               <X size={14} />
             </button>
           </div>

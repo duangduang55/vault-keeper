@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -12,57 +12,75 @@
   to { opacity: 1; }
 }
 
-.animate-slide-up { animation: slide-up 0.2s ease-out; }
-.animate-fade-in { animation: fade-in 0.15s ease-out; }
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-slide-up { animation: slide-up 0.25s ease-out; }
+.animate-fade-in { animation: fade-in 0.2s ease-out; }
+.animate-scale-in { animation: scale-in 0.2s ease-out; }
+
+/* ===== 主题系统 — CSS 自定义属性 ===== */
+
+/* 亮色模式（默认）：低对比度暖色系 — 柔和护眼 */
+:root {
+  --color-surface-950: #f4f1ec;
+  --color-surface-900: #faf8f4;
+  --color-surface-800: #e8e4dd;
+  --color-surface-700: #ddd9d2;
+  --color-surface-600: #cec9c2;
+  --color-surface-500: #aeaaa4;
+  --color-surface-400: #96918c;
+  --color-surface-300: #7a7671;
+  --color-surface-200: #5e5a55;
+  --color-surface-100: #4d4945;
+  --color-surface-50:  #302d29;
+}
+
+/* 暗色模式：Apple 深色灰阶 */
+.dark {
+  --color-surface-950: #000000;
+  --color-surface-900: #1c1c1e;
+  --color-surface-800: #2c2c2e;
+  --color-surface-700: #3a3a3c;
+  --color-surface-600: #48484a;
+  --color-surface-500: #636366;
+  --color-surface-400: #8e8e93;
+  --color-surface-300: #aeaeb2;
+  --color-surface-200: #d1d1d6;
+  --color-surface-100: #e5e5ea;
+  --color-surface-50:  #f2f2f7;
+}
 
 @layer base {
   body {
     @apply bg-surface-950 text-surface-100 antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   #root {
     @apply min-h-screen;
   }
-}
 
-@layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg
-           bg-primary-600 text-white font-medium
-           hover:bg-primary-700 active:bg-primary-800
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-surface-900
-           disabled:opacity-50 disabled:cursor-not-allowed
-           transition-colors duration-150;
+  ::selection {
+    @apply bg-primary-500/30;
   }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center px-3 py-2 rounded-lg
-           text-surface-400 hover:text-surface-100 hover:bg-surface-800
-           focus:outline-none focus:ring-2 focus:ring-surface-500
-           transition-colors duration-150;
+  /* Apple 风格滚动条 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-
-  .btn-danger {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg
-           bg-red-600 text-white font-medium
-           hover:bg-red-700 active:bg-red-800
-           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-surface-900
-           disabled:opacity-50 disabled:cursor-not-allowed
-           transition-colors duration-150;
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
-
-  .input-field {
-    @apply w-full px-3 py-2 rounded-lg
-           bg-surface-800 border border-surface-700 text-surface-100
-           placeholder:text-surface-500
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-           disabled:opacity-50 disabled:cursor-not-allowed
-           transition-colors duration-150;
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600 rounded-full;
   }
-
-  .card {
-    @apply bg-surface-800 border border-surface-700 rounded-xl p-4
-           hover:border-surface-600 transition-colors duration-150;
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-500;
   }
 }

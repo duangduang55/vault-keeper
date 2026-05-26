@@ -1,22 +1,28 @@
 import { useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { useAuthStore } from '../stores/authStore';
+import { useThemeStore, watchSystemTheme } from '../stores/themeStore';
 import { SetupView } from './SetupView';
 import { UnlockView } from './UnlockView';
 import { AppShell } from './layout/AppShell';
 
 export function AuthGate() {
   const { lockState, isLoading, checkLockState, peekLockState } = useAuthStore();
+  const loadTheme = useThemeStore((s) => s.loadTheme);
 
   useEffect(() => {
+    loadTheme();
     checkLockState();
+
+    // 监听系统主题变化
+    const unwatch = watchSystemTheme();
 
     // 监听托盘/Dock 菜单的锁定事件
     const unlisten = listen('vault-locked', () => {
       checkLockState();
     });
-    return () => { unlisten.then((f) => f()) };
-  }, [checkLockState]);
+    return () => { unlisten.then((f) => f()); unwatch(); };
+  }, [checkLockState, loadTheme]);
 
   // 解锁状态下定期检查自动锁定（每 2 秒）
   useEffect(() => {

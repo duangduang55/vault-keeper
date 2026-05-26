@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,32 +8,42 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Apple 风格蓝色 — 主交互色（双主题相同）
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: '#e8f1ff',
+          100: '#d0e3ff',
+          200: '#a3c7ff',
+          300: '#70abff',
+          400: '#3d8eff',
+          500: '#007aff',
+          600: '#0062cc',
+          700: '#004999',
+          800: '#003166',
+          900: '#001833',
         },
+        // 双主题表面色 — 通过 CSS 自定义属性自动切换
         surface: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+          50: 'var(--color-surface-50)',
+          100: 'var(--color-surface-100)',
+          200: 'var(--color-surface-200)',
+          300: 'var(--color-surface-300)',
+          400: 'var(--color-surface-400)',
+          500: 'var(--color-surface-500)',
+          600: 'var(--color-surface-600)',
+          700: 'var(--color-surface-700)',
+          800: 'var(--color-surface-800)',
+          900: 'var(--color-surface-900)',
+          950: 'var(--color-surface-950)',
         },
+      },
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
+        mono: ['"SF Mono"', 'SFMono-Regular', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],
+      },
+      borderRadius: {
+        sm: '6px',
+        DEFAULT: '10px',
+        lg: '14px',
       },
     },
   },

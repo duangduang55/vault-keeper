@@ -1,7 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react'
 import { Modal } from '../common/Modal'
 import { Button } from '../common/Button'
 import { Input } from '../common/Input'
+import { Lock, Unlock, Plus, X } from 'lucide-react'
 import { useEntryStore } from '../../stores/entryStore'
 import { CATEGORY_TEMPLATES, getTemplate } from '../../lib/templates'
 import type { Entry, CreateEntryParams } from '../../types/entry'
@@ -29,25 +31,21 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
   const isEdit = !!editEntry
 
   useEffect(() => {
-    if (editEntry) {
-      try {
-        const parsed = JSON.parse(editEntry.fields || '{}') as Record<string, string>
-        // 提取敏感字段元数据
-        const sensitiveRaw = parsed['_sensitive'] || ''
-        if (sensitiveRaw) {
-          delete parsed['_sensitive']
-          setSensitiveCustomFields(new Set(sensitiveRaw.split(',').filter(Boolean)))
-        }
-        setFields(parsed)
-      } catch { setFields({}) }
-    }
-  }, [editEntry])
+    if (!editEntry) return
+    try {
+      const parsed = JSON.parse(editEntry.fields || '{}') as Record<string, string>
+      const sensitiveRaw = parsed['_sensitive'] || ''
+      if (sensitiveRaw) {
+        delete parsed['_sensitive']
+        setSensitiveCustomFields(new Set(sensitiveRaw.split(',').filter(Boolean)))
+      }
+      setFields(parsed)
+    } catch { setFields({}) }
+  }, [])
 
-  // 根据模板初始化多行字段状态
   useEffect(() => {
-    if (template) {
-      setMultilineFields(new Set(template.fields.filter(f => f.multiline).map(f => f.key)))
-    }
+    if (!template) return
+    setMultilineFields(new Set(template.fields.filter(f => f.multiline).map(f => f.key)))
   }, [template])
 
   const canHaveMultiline = (f: FieldDefinition) => f.type !== 'password'
@@ -65,7 +63,6 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
     if (!name.trim()) return
     if (!isEdit && !type) return
 
-    // 自定义条目：将敏感字段元数据写入 fields
     const activeType = isEdit ? editEntry!.entry_type : type
     let fieldsToSave = fields
     if (activeType === 'custom' && sensitiveCustomFields.size > 0) {
@@ -114,10 +111,10 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                   <button
                     key={t.type}
                     onClick={() => { setType(t.type); setFields({}) }}
-                    className={`px-3 py-2.5 rounded-lg text-sm border transition-colors
+                    className={`px-3 py-2.5 rounded-[10px] text-sm border transition-all duration-200
                       ${type === t.type
-                        ? 'border-primary-500 bg-primary-600/10 text-primary-400'
-                        : 'border-surface-700 bg-surface-800 text-surface-300 hover:border-surface-600'
+                        ? 'border-primary-500 bg-primary-500/10 text-primary-400'
+                        : 'border-surface-700 bg-surface-800 text-surface-300 hover:border-surface-500'
                       }`}
                   >
                     {t.label}
@@ -151,7 +148,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                         <button
                           type="button"
                           onClick={() => toggleMultiline(f.key)}
-                          className="text-[11px] text-primary-400 hover:text-primary-300"
+                          className="text-[11px] text-primary-400 hover:text-primary-300 transition-colors"
                         >
                           {isMultiline ? '单行' : '多行'}
                         </button>
@@ -163,7 +160,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                         onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
                         placeholder={f.placeholder}
                         rows={4}
-                        className="w-full px-3 py-2 rounded-lg bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y min-h-[80px]"
+                        className="w-full px-3 py-2 rounded-[10px] bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[80px] transition-all duration-200"
                       />
                     ) : (
                       <div className="relative">
@@ -178,7 +175,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                           <button
                             type="button"
                             onClick={() => { setTargetField(f.key); setShowGenerator(true) }}
-                            className="absolute right-10 bottom-2 text-[11px] text-primary-400 hover:text-primary-300"
+                            className="absolute right-10 top-1/2 -translate-y-1/2 text-[11px] text-primary-400 hover:text-primary-300 transition-colors"
                           >
                             生成
                           </button>
@@ -205,7 +202,6 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                             delete newFields[key]
                             newFields[newKey] = val
                             setFields(newFields)
-                            // 同步多行状态
                             setMultilineFields(prev => {
                               const next = new Set(prev)
                               if (next.has(multilineKey)) {
@@ -231,14 +227,15 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                                     return next
                                   })
                                 }}
-                                className={`text-[11px] transition-colors ${sensitiveCustomFields.has(key) ? 'text-yellow-400' : 'text-surface-500 hover:text-surface-300'}`}
+                                className={`flex items-center gap-1 text-[11px] transition-colors ${sensitiveCustomFields.has(key) ? 'text-yellow-400' : 'text-surface-500 hover:text-surface-300'}`}
                               >
-                                {sensitiveCustomFields.has(key) ? '🔒 敏感' : '公开'}
+                                {sensitiveCustomFields.has(key) ? <Lock size={11} /> : <Unlock size={11} />}
+                                {sensitiveCustomFields.has(key) ? '敏感' : '公开'}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => toggleMultiline(multilineKey)}
-                                className="text-[11px] text-primary-400 hover:text-primary-300"
+                                className="text-[11px] text-primary-400 hover:text-primary-300 transition-colors"
                               >
                                 {isMultiline ? '单行' : '多行'}
                               </button>
@@ -249,7 +246,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                               value={val}
                               onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-lg bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y min-h-[60px]"
+                              className="w-full px-3 py-2 rounded-[10px] bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[60px] transition-all duration-200"
                             />
                           ) : (
                             <Input
@@ -267,15 +264,16 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                             delete newFields[key]
                             setFields(newFields)
                           }}
-                          className="text-surface-500 hover:text-red-400 pt-6"
+                          className="p-1 text-surface-500 hover:text-red-400 pt-6 transition-colors"
                         >
-                          ✕
+                          <X size={14} />
                         </button>
                       </div>
                     )
                   })}
                   <Button variant="ghost" size="sm" onClick={() => setFields((prev) => ({ ...prev, ['']: '' }))}>
-                    + 添加字段
+                    <Plus size={14} />
+                    添加字段
                   </Button>
                 </div>
               )}

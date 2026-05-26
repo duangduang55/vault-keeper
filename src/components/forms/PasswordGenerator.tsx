@@ -19,7 +19,7 @@ function evaluateStrength(pw: string): { score: number; label: string; color: st
   if (/[^a-zA-Z0-9]/.test(pw)) score++
 
   const label = score < 3 ? '弱' : score < 5 ? '中' : '强'
-  const color = score < 3 ? 'bg-red-500' : score < 5 ? 'bg-yellow-500' : 'bg-green-500'
+  const color = score < 3 ? 'bg-red-500' : score < 5 ? 'bg-orange-500' : 'bg-green-500'
   return { score, label, color }
 }
 
@@ -76,14 +76,14 @@ export function PasswordGenerator({ open, onClose, onGenerate }: PasswordGenerat
     <Modal open={open} onClose={onClose} title="密码生成器" size="sm">
       <div className="space-y-4">
         {password && (
-          <div className="bg-surface-900 border border-surface-700 rounded-lg p-3">
-            <p className="text-lg font-mono text-center text-surface-100 break-all select-all">{password}</p>
-            <div className="mt-2 flex gap-1">
+          <div className="bg-surface-800 border border-surface-800 rounded-[10px] p-3">
+            <p className="text-base font-mono text-center text-surface-100 break-all select-all tracking-wide">{password}</p>
+            <div className="mt-2.5 flex gap-1">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className={`h-1 flex-1 rounded-full ${i < strength.score ? strength.color : 'bg-surface-700'}`} />
+                <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < strength.score ? strength.color : 'bg-surface-600'}`} />
               ))}
             </div>
-            <p className="text-xs text-surface-500 text-center mt-1">{strength.label} ({length} 位)</p>
+            <p className="text-xs text-surface-500 text-center mt-1">{strength.label} · {length} 位</p>
           </div>
         )}
 
@@ -109,14 +109,19 @@ export function PasswordGenerator({ open, onClose, onGenerate }: PasswordGenerat
             { label: '数字 0-9', value: useDigits, set: setUseDigits },
             { label: '符号 !@#$%', value: useSymbols, set: setUseSymbols },
           ].map(({ label, value, set }) => (
-            <label key={label} className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" checked={value} onChange={() => set(!value)} className="rounded border-surface-600 bg-surface-800 text-primary-500 focus:ring-primary-500" />
-              <span className="text-sm text-surface-300">{label}</span>
+            <label key={label} className="flex items-center gap-2.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={() => set(!value)}
+                className="rounded border-surface-500 bg-surface-800 text-primary-500 focus:ring-primary-500/50 focus:ring-offset-0"
+              />
+              <span className="text-sm text-surface-300 group-hover:text-surface-100 transition-colors">{label}</span>
             </label>
           ))}
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
           <Button variant="secondary" onClick={generate}>生成</Button>
           <div className="flex gap-2">
             {password && (
