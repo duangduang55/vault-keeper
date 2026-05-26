@@ -32,7 +32,7 @@ export const CATEGORY_TEMPLATES: CategoryTemplate[] = [
     icon: 'CreditCard',
     fields: [
       { key: 'name', label: '姓名', type: 'text', required: true, placeholder: '真实姓名' },
-      { key: 'idNumber', label: '身份证号', type: 'text', required: true, placeholder: '18位身份证号' },
+      { key: 'idNumber', label: '身份证号', type: 'password', required: true, placeholder: '18位身份证号' },
       { key: 'gender', label: '性别', type: 'text', required: false, placeholder: '男/女' },
       { key: 'birthDate', label: '出生日期', type: 'date', required: false, placeholder: 'YYYY-MM-DD' },
       { key: 'notes', label: '备注', type: 'text', required: false, placeholder: '添加备注信息...', multiline: true },
@@ -44,7 +44,7 @@ export const CATEGORY_TEMPLATES: CategoryTemplate[] = [
     icon: 'Ticket',
     fields: [
       { key: 'name', label: '名称', type: 'text', required: true, placeholder: '例如: IntelliJ IDEA' },
-      { key: 'licenseKey', label: '激活码', type: 'text', required: true, placeholder: 'XXXX-XXXX-XXXX' },
+      { key: 'licenseKey', label: '激活码', type: 'password', required: true, placeholder: 'XXXX-XXXX-XXXX' },
       { key: 'product', label: '产品', type: 'text', required: false, placeholder: '产品名称' },
       { key: 'purchaseDate', label: '购买日期', type: 'date', required: false, placeholder: 'YYYY-MM-DD' },
       { key: 'notes', label: '备注', type: 'text', required: false, placeholder: '添加备注信息...', multiline: true },

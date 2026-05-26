@@ -6,7 +6,7 @@ import { toast } from './Toast'
 interface CopyButtonProps {
   entryId: string
   fieldKey: string
-  value: string
+  value?: string
 }
 
 export function CopyButton({ entryId, fieldKey }: CopyButtonProps) {

@@ -23,6 +23,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
   const [showGenerator, setShowGenerator] = useState(false)
   const [targetField, setTargetField] = useState<string | null>(null)
   const [multilineFields, setMultilineFields] = useState<Set<string>>(new Set())
+  const [sensitiveCustomFields, setSensitiveCustomFields] = useState<Set<string>>(new Set())
 
   const template = type ? getTemplate(type as EntryType) : null
   const isEdit = !!editEntry
@@ -30,7 +31,14 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
   useEffect(() => {
     if (editEntry) {
       try {
-        setFields(JSON.parse(editEntry.fields || '{}'))
+        const parsed = JSON.parse(editEntry.fields || '{}') as Record<string, string>
+        // 提取敏感字段元数据
+        const sensitiveRaw = parsed['_sensitive'] || ''
+        if (sensitiveRaw) {
+          delete parsed['_sensitive']
+          setSensitiveCustomFields(new Set(sensitiveRaw.split(',').filter(Boolean)))
+        }
+        setFields(parsed)
       } catch { setFields({}) }
     }
   }, [editEntry])
@@ -57,10 +65,17 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
     if (!name.trim()) return
     if (!isEdit && !type) return
 
+    // 自定义条目：将敏感字段元数据写入 fields
+    const activeType = isEdit ? editEntry!.entry_type : type
+    let fieldsToSave = fields
+    if (activeType === 'custom' && sensitiveCustomFields.size > 0) {
+      fieldsToSave = { ...fields, _sensitive: [...sensitiveCustomFields].join(',') }
+    }
+
     const params: CreateEntryParams = {
       entry_type: isEdit ? editEntry!.entry_type : type,
       name: name.trim(),
-      fields: JSON.stringify(fields),
+      fields: JSON.stringify(fieldsToSave),
     }
 
     setSaving(true)
@@ -203,15 +218,31 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                           className="w-1/3"
                         />
                         <div className="flex-1 space-y-1">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-1">
                             <label className="block text-sm font-medium text-surface-300">值</label>
-                            <button
-                              type="button"
-                              onClick={() => toggleMultiline(multilineKey)}
-                              className="text-[11px] text-primary-400 hover:text-primary-300"
-                            >
-                              {isMultiline ? '单行' : '多行'}
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSensitiveCustomFields(prev => {
+                                    const next = new Set(prev)
+                                    if (next.has(key)) next.delete(key)
+                                    else next.add(key)
+                                    return next
+                                  })
+                                }}
+                                className={`text-[11px] transition-colors ${sensitiveCustomFields.has(key) ? 'text-yellow-400' : 'text-surface-500 hover:text-surface-300'}`}
+                              >
+                                {sensitiveCustomFields.has(key) ? '🔒 敏感' : '公开'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleMultiline(multilineKey)}
+                                className="text-[11px] text-primary-400 hover:text-primary-300"
+                              >
+                                {isMultiline ? '单行' : '多行'}
+                              </button>
+                            </div>
                           </div>
                           {isMultiline ? (
                             <textarea
@@ -222,6 +253,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                             />
                           ) : (
                             <Input
+                              type={sensitiveCustomFields.has(key) ? 'password' : 'text'}
                               value={val}
                               onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
                               className="w-full"
