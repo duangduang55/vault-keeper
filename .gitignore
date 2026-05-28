@@ -53,5 +53,12 @@ harness/
 .claude/
 CLAUDE.md
 
+#html
+html/
+index.html
+
+# Release artifacts (local backup)
+release/
+
 # Runtime logs
 logs/

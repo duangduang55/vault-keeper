@@ -1,50 +1,57 @@
 # 清密 (Vault Keeper) 🔐
 
-> 安全地在本地管理 API Key、账号密码、激活码、身份证号码等敏感信息。纯本地运行，主密码解锁 + SQLCipher 加密 + 卡片式分类管理。
+> 你的私人密码保险箱。纯本地运行，Argon2id + SQLCipher 零信任加密。
 
-**v0.2.0**
+**v1.0.0** · macOS 14+
 
 ---
 
-## 📋 更新日志
+## 🚀 快速安装
 
-### v0.2.0 (2026-05-26)
-- **新增**: 双主题系统 — 设置中切换自动/暗色/亮色主题
-- **新增**: 柔和暖色亮色主题，低对比度护眼设计
-- **新增**: 主题自动模式，跟随系统设置切换
-- **改进**: Apple 风格极简 UI 全面重设计
-- **改进**: 统一 Lucide SVG 图标，移除所有 emoji
-- **改进**: 布局重构（T-frame），顶部分隔线全宽贯通
-- **改进**: 版本号统一，通过 Tauri API 动态读取
-- **修复**: 嵌套 \<button\> DOM 错误
-- **修复**: 左侧栏与搜索栏边框对齐
+### 方式一：Homebrew
 
-### v0.1.3 (2026-05-26)
-- **修复**: 条目卡片预览不再显示关键信息（密码、Key、身份证号等）
-- **新增**: 条目卡片右下角复制按钮，一键复制关键字段
-- **改进**: 激活码视为关键信息，默认隐藏显示
-- **改进**: 自定义字段新增"敏感"标记开关
+```bash
+brew tap duangduang55/vault-keeper
+brew install vault-keeper
+```
 
-### v0.1.2 (2026-05-26)
-- **修复**: 点击 Dock 图标重新打开窗口
-- **修复**: 点击左侧分类时立即切换右侧内容
-- **改进**: 搜索清空时不关闭条目详情
+### 方式二：手动下载
 
-### v0.1.1
-- 初始发布：基础功能、iCloud 备份、全局快捷键
+从 [GitHub Releases](https://github.com/duangduang55/vault-keeper/releases) 下载最新 `.dmg` 安装包。
 
-- **主密码保护** — Argon2id 密钥派生 + SQLCipher 数据库透明加密
-- **双主题** — 暗色/亮色/自动，跟随系统或手动切换
-- **5 种分类模板** — API Key / 密码 / 身份证 / 激活码 / 自定义
-- **快速搜索** — 同时搜索名称、字段内容、条目类型
-- **一键复制** — 复制到剪贴板，10 秒自动清除
-- **密码生成器** — 长度 8-64、4 种字符类型、强度指示
-- **加密备份** — AES-256-GCM 独立密码导出/导入
-- **自动锁定** — 闲置时间自定义，自动锁定
-- **备注多行** — 字段支持单行/多行切换，详情保留换行格式
-- **修改主密码**
-- **macOS 专属** — 关闭到 Dock、状态栏图标、全局快捷键 (Cmd+Shift+V)
-- **iCloud 云备份** — 手动/自动备份到 iCloud Drive，加密存储
+---
+
+## ✨ 功能特性
+
+### 🔐 主密码保护
+Argon2id 密钥派生（64MB / 3 轮 / 4 通道）+ SQLCipher AES-256-GCM 透明加密。密码仅存于你的设备，服务端无法访问任何数据。
+
+### 🎨 双主题系统
+暗色/亮色/自动模式，跟随系统设置或手动切换。暖色护眼亮色主题，低对比度设计减少视觉疲劳。
+
+### 📋 5 种分类模板
+API Key / 密码 / 身份证 / 激活码 / 自定义 — 每种类型预设专属字段模板，开箱即用。
+
+### 🔍 快速搜索
+同时搜索名称、字段内容、条目类型，秒级检索。
+
+### 📋 一键复制
+点击卡片右下角复制按钮，字段值自动复制到剪贴板，10 秒自动清除，防止信息残留。
+
+### 🔄 自动锁定
+闲置超时自动锁定保险箱，支持自定义锁定间隔。
+
+### 🔑 密码生成器
+长度 8-64 位，4 种字符类型自由组合，实时强度指示。
+
+### ☁️ iCloud 云备份
+手动/自动加密备份到 iCloud Drive，AES-256-GCM 独立备份密码保护，支持多地备份管理。
+
+### 🔒 加密备份导出
+独立密码保护的 AES-256-GCM 加密导出/导入，方便迁移和存档。
+
+### ⌨️ 全局快捷键
+`Cmd+Shift+V` 快速唤醒窗口，`Cmd+Shift+L` 一键锁定。
 
 ---
 
@@ -64,97 +71,25 @@
 
 ---
 
-## 📦 前置条件
+## 🛠 开发
+
+```bash
+# 安装依赖
+npm install
+
+# 开发模式（热更新 + 桌面窗口）
+npm run tauri dev
+
+# 构建生产版本
+npm run tauri build
+```
+
+### 前置条件
 
 - **Node.js** ≥ 18
 - **Rust 工具链** — 通过 [rustup](https://rustup.rs) 安装
 - **SQLCipher** — macOS: `brew install sqlcipher`
 - **Xcode Command Line Tools** — `xcode-select --install`
-
-## 🚀 快速开始
-
-```bash
-# 1. 安装前端依赖
-cd vault-keeper
-npm install
-
-# 2. 开发模式（热更新 + 桌面窗口）
-npm run tauri dev
-
-# 3. 构建生产版本
-npm run tauri build
-```
-
-## 🔧 开发命令
-
-```bash
-npm run dev              # 仅前端开发（浏览器）
-npm run tauri dev        # 完整桌面应用开发模式
-npm run build            # 前端构建（TypeScript + Vite）
-npm run tauri build      # 打包桌面应用（macOS DMG）
-npm run lint             # ESLint 检查
-npx tsc -b config/tsconfig.json  # TypeScript 类型检查
-
-cd src-tauri && cargo check   # Rust 快速类型检查
-cd src-tauri && cargo test    # 运行 Rust 测试
-cd src-tauri && cargo clippy  # Rust lint 检查
-```
-
-> **注意**：首次 `cargo build` 可能需要较长时间下载编译依赖。`npm run tauri dev` 会自动完成全部构建。
-
-## 📖 使用流程
-
-1. **首次运行** → 设置主密码（用于解锁保险箱）
-2. **添加条目** → 选择分类（API Key / 密码 / 身份证 / 激活码 / 自定义），填写字段
-3. **日常使用** → 搜索条目、一键复制字段值到剪贴板（10 秒自动清除）
-4. **安全退出** → 锁定保险箱或关闭窗口（自动清除内存中的密钥）
-5. **备份** → 设置页导出/导入加密备份（独立备份密码）
-
-## Homebrew 安装
-
-```bash
-brew tap duangduang55/vault-keeper
-brew install vault-keeper
-```
-
-## 📁 项目结构
-
-```
-vault-keeper/
-├── config/                     # 项目配置文件
-│   ├── vite.config.ts          #   Vite 构建配置
-│   ├── eslint.config.js        #   ESLint 配置
-│   ├── tailwind.config.js      #   Tailwind CSS 配置
-│   ├── postcss.config.js       #   PostCSS 配置
-│   └── tsconfig*.json          #   TypeScript 配置
-├── public/                     # 静态资源
-├── src/                        # React 前端
-│   ├── components/             #   组件（通用、布局、保险箱、表单、设置）
-│   ├── stores/                 #   Zustand 状态管理
-│   ├── types/                  #   类型定义
-│   └── lib/                    #   工具函数
-├── src-tauri/                  # Rust 后端
-│   └── src/
-│       ├── commands/           #   Tauri 命令
-│       ├── crypto/             #   加密模块（Argon2, AES-256-GCM, Keychain）
-│       └── db/                 #   数据库（SQLCipher, 迁移, CRUD）
-├── index.html
-├── package.json
-└── README.md
-```
-
-### 目录结构约定
-
-| 目录 | 用途 |
-|------|------|
-| `config/` | 项目配置文件 |
-| `src/` | 源代码 |
-
----
-
-## 🤖 AI 生成声明
-
-> 此项目没有人工写的任何一串代码。全部代码均由 **DeepSeek v4** 模型通过 **Claude Code** 生成。
 
 ---
 

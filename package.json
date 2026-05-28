@@ -1,7 +1,7 @@
 {
   "name": "vault-keeper",
   "private": true,
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Secure local vault for API keys, passwords, and sensitive info",
   "type": "module",
   "scripts": {

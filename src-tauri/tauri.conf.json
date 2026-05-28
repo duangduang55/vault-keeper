@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Vault Keeper",
-  "version": "0.2.0",
+  "productName": "清密",
+  "version": "1.0.0",
   "identifier": "com.duangduang55.vault-keeper",
   "build": {
     "frontendDist": "../dist",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Vault Keeper",
+        "title": "清密",
         "width": 960,
         "height": 680,
         "minWidth": 640,
