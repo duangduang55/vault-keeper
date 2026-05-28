@@ -12,7 +12,7 @@
 
 ```bash
 brew tap duangduang55/vault-keeper
-brew install vault-keeper
+brew install --cask vault-keeper
 ```
 
 ### 方式二：手动下载
