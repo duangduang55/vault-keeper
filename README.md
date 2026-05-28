@@ -1,4 +1,4 @@
-# Vault Keeper 🔐
+# 清密 (Vault Keeper) 🔐
 
 > 安全地在本地管理 API Key、账号密码、激活码、身份证号码等敏感信息。纯本地运行，主密码解锁 + SQLCipher 加密 + 卡片式分类管理。
 
@@ -110,6 +110,13 @@ cd src-tauri && cargo clippy  # Rust lint 检查
 4. **安全退出** → 锁定保险箱或关闭窗口（自动清除内存中的密钥）
 5. **备份** → 设置页导出/导入加密备份（独立备份密码）
 
+## Homebrew 安装
+
+```bash
+brew tap duangduang55/vault-keeper
+brew install vault-keeper
+```
+
 ## 📁 项目结构
 
 ```
@@ -138,8 +145,6 @@ vault-keeper/
 
 ### 目录结构约定
 
-| 目录 | 用途 |
-|------|------|
 | 目录 | 用途 |
 |------|------|
 | `config/` | 项目配置文件 |
