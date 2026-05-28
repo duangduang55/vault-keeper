@@ -19,6 +19,11 @@ brew install --cask vault-keeper
 
 从 [GitHub Releases](https://github.com/duangduang55/vault-keeper/releases) 下载最新 `.dmg` 安装包。
 
+> **注意**：首次打开提示"无法验证开发者"时，请右键 → 打开，或在终端运行：
+> ```bash
+> xattr -d com.apple.quarantine /Applications/清密.app
+> ```
+
 ---
 
 ## ✨ 功能特性
