@@ -13,6 +13,8 @@ pub struct AppState {
     pub db_dir: std::path::PathBuf,
     pub current_shortcut: std::sync::Mutex<String>,
     pub current_lock_shortcut: std::sync::Mutex<String>,
+    /// 持久化数据库连接（应用生命周期内只打开一次，避免反复暴露密钥）
+    pub db_conn: std::sync::Mutex<Option<db::Connection>>,
 }
 
 /// 存储在加密库外的明文配置文件（仅含非敏感验证数据）
@@ -30,9 +32,9 @@ impl VaultConfig {
     fn read(db_dir: &std::path::Path) -> AppResult<Self> {
         let path = Self::path(db_dir);
         let data = std::fs::read_to_string(&path)
-            .map_err(|e| AppError::Other(format!("读取配置失败: {}", e)))?;
+            .map_err(|_| AppError::Other("无法读取应用配置".to_string()))?;
         serde_json::from_str(&data)
-            .map_err(|e| AppError::Other(format!("配置解析失败: {}", e)))
+            .map_err(|_| AppError::Other("应用配置格式错误，请检查配置文件".to_string()))
     }
 
     fn write(db_dir: &std::path::Path, config: &Self) -> AppResult<()> {
@@ -84,6 +86,12 @@ pub async fn setup(
         // 写入应用配置到加密库
         db::MetadataRepo::set(conn.inner(), "auto_lock_seconds", "300")?;
         db::MetadataRepo::set(conn.inner(), "theme", "dark")?;
+
+        // 存储持久化连接，避免后续命令反复暴露密钥
+        let mut db_conn = state.db_conn.lock().map_err(|e|
+            AppError::LockState(format!("获取数据库连接锁失败: {}", e))
+        )?;
+        *db_conn = Some(conn);
     }
 
     // 数据库创建成功后再写入配置文件（含 fsync 确保落盘）
@@ -127,9 +135,9 @@ pub async fn unlock(
 
     // 解码盐值
     let salt_bytes: [u8; 32] = hex::decode(&config.master_salt)
-        .map_err(|e| AppError::Crypto(format!("盐值解码失败: {}", e)))?
+        .map_err(|_| AppError::Auth("配置数据异常，请重新设置主密码".to_string()))?
         .try_into()
-        .map_err(|_| AppError::Crypto("盐值长度不正确".to_string()))?;
+        .map_err(|_| AppError::Auth("配置数据异常，请重新设置主密码".to_string()))?;
 
     // 派生密钥
     let password_secret = Secret::new(password);
@@ -143,11 +151,26 @@ pub async fn unlock(
     // 验证数据库密钥
     let db = db::Connection::open_with_key(&db_path, derived_key.expose_secret())?;
 
+    // 存储持久化连接，避免后续命令反复暴露密钥
+    {
+        let mut db_conn = state.db_conn.lock().map_err(|e|
+            AppError::LockState(format!("获取数据库连接锁失败: {}", e))
+        )?;
+        *db_conn = Some(db);
+    }
+
     // 设置密钥到密钥链
     state.keychain.set_key(derived_key)?;
 
     // 从加密库加载保存的快捷键配置，覆盖默认值并重新注册
-    if let Some(shortcut) = db::MetadataRepo::get(db.inner(), "lock_shortcut")
+    // 解锁后 db_conn 已持有，但这里仍需通过 db_conn 读取
+    let db_conn_guard = state.db_conn.lock().map_err(|e|
+        AppError::LockState(format!("获取数据库连接锁失败: {}", e))
+    )?;
+    let conn = db_conn_guard.as_ref()
+        .ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
+
+    if let Some(shortcut) = db::MetadataRepo::get(conn.inner(), "lock_shortcut")
         .ok().flatten()
     {
         let mut old = state.current_lock_shortcut.lock()
@@ -158,7 +181,7 @@ pub async fn unlock(
             *old = shortcut;
         }
     }
-    if let Some(shortcut) = db::MetadataRepo::get(db.inner(), "global_shortcut")
+    if let Some(shortcut) = db::MetadataRepo::get(conn.inner(), "global_shortcut")
         .ok().flatten()
     {
         let mut old = state.current_shortcut.lock()
@@ -169,6 +192,7 @@ pub async fn unlock(
             *old = shortcut;
         }
     }
+    drop(db_conn_guard);
 
     Ok(UnlockResult {
         success: true,
@@ -179,6 +203,13 @@ pub async fn unlock(
 /// 锁定保险箱
 #[tauri::command]
 pub async fn lock(state: State<'_, AppState>) -> Result<LockResult, AppError> {
+    // 清除持久化数据库连接，确保密钥不在连接中残留
+    {
+        let mut db_conn = state.db_conn.lock().map_err(|e|
+            AppError::LockState(format!("获取数据库连接锁失败: {}", e))
+        )?;
+        *db_conn = None; // drop the connection, releasing the SQLCipher key
+    }
     state.keychain.lock()?;
     Ok(LockResult {
         success: true,
@@ -232,17 +263,18 @@ pub async fn change_master_password(
         return Err(AppError::LockState("保险箱已锁定，请先解锁".to_string()));
     }
 
-    let db_path = db::connection::get_db_path(&state.db_dir);
+    let _db_path = db::connection::get_db_path(&state.db_dir);
 
     // 从配置文件读取旧盐值
-    let config = VaultConfig::read(&state.db_dir)?;
+    let config = VaultConfig::read(&state.db_dir)
+        .map_err(|_| AppError::Auth("无法读取主密码配置，请确认应用数据是否完整".to_string()))?;
     let old_salt: [u8; 32] = hex::decode(&config.master_salt)
-        .map_err(|e| AppError::Crypto(format!("盐值解码失败: {}", e)))?
+        .map_err(|_| AppError::Crypto("主密码配置数据异常".to_string()))?
         .try_into()
-        .map_err(|_| AppError::Crypto("盐值长度不正确".to_string()))?;
+        .map_err(|_| AppError::Crypto("主密码配置数据异常".to_string()))?;
 
     let old_pw = Secret::new(old_password);
-    let old_key = crypto::derive_key(&old_pw, &old_salt)?;
+    let _old_key = crypto::derive_key(&old_pw, &old_salt)?;
 
     // 生成新盐值和密钥
     let mut new_salt = [0u8; 32];
@@ -255,7 +287,12 @@ pub async fn change_master_password(
     // 先 rekey 数据库，再更新配置文件
     // 顺序不可颠倒：先写配置再 rekey 会在崩溃时导致新旧密钥都不匹配，永久锁死用户
     {
-        let conn = db::Connection::open_with_key(&db_path, old_key.expose_secret())?;
+        // 通过持久化连接 rekey
+        let db_conn = state.db_conn.lock().map_err(|e|
+            AppError::LockState(format!("获取数据库连接锁失败: {}", e))
+        )?;
+        let conn = db_conn.as_ref()
+            .ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
         conn.rekey(new_key.expose_secret())?;
     }
 

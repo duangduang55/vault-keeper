@@ -61,6 +61,7 @@ pub fn run() {
                 db_dir: app_data_dir,
                 current_shortcut: Mutex::new(DEFAULT_SHORTCUT.to_string()),
                 current_lock_shortcut: Mutex::new(DEFAULT_LOCK_SHORTCUT.to_string()),
+                db_conn: Mutex::new(None),
             });
 
             // ========== 关闭到 Dock ==========
@@ -75,16 +76,15 @@ pub fn run() {
             }
 
             // ========== 状态栏图标和菜单 ==========
-            let tray_icon = app.default_window_icon().cloned()
-                .unwrap_or_else(|| {
-                    let png_bytes = include_bytes!("../icons/32x32.png");
-                    let cursor = std::io::Cursor::new(png_bytes as &[u8]);
-                    let decoder = png::Decoder::new(cursor);
-                    let mut reader = decoder.read_info().expect("读取 PNG 信息失败");
-                    let mut rgba = vec![0u8; reader.output_buffer_size()];
-                    reader.next_frame(&mut rgba).expect("解码 PNG 失败");
-                    tauri::image::Image::new_owned(rgba, reader.info().width, reader.info().height).into()
-                });
+            // 使用专用的 16x16 模板图标（macOS 自动适配亮暗菜单栏）
+            let png_bytes = include_bytes!("../icons/tray-icon.png");
+            let cursor = std::io::Cursor::new(png_bytes as &[u8]);
+            let decoder = png::Decoder::new(cursor);
+            let mut reader = decoder.read_info().expect("读取 PNG 信息失败");
+            let mut rgba = vec![0u8; reader.output_buffer_size()];
+            reader.next_frame(&mut rgba).expect("解码 PNG 失败");
+            let tray_icon = tauri::image::Image::new_owned(rgba, reader.info().width, reader.info().height);
+
             let show = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
             let backup = MenuItem::with_id(app, "backup_icloud", "备份到 iCloud", true, None::<&str>)?;
             let lock = MenuItem::with_id(app, "lock", "锁定保险箱", true, None::<&str>)?;
@@ -92,8 +92,9 @@ pub fn run() {
             let menu = Menu::with_items(app, &[&show, &backup, &lock, &quit])?;
 
             let _tray = TrayIconBuilder::new()
-                .icon(tray_icon.clone())
-                .tooltip("Vault Keeper")
+                .icon(tray_icon)
+                .icon_as_template(true)
+                .tooltip("清密")
                 .menu(&menu)
                 .on_menu_event(|app, event| {
                     match event.id().as_ref() {
@@ -237,20 +238,23 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
 
         let interval_str = match db::MetadataRepo::get(conn.inner(), "auto_backup_interval") {
             Ok(Some(v)) => v,
-            _ => continue,
+            _ => {
+                drop(conn);
+                continue;
+            },
         };
 
         let interval_secs: u64 = match interval_str.parse() {
-            Ok(0) => continue,  // 已禁用
+            Ok(0) => {
+                drop(conn);
+                continue;  // 已禁用
+            },
             Ok(n) => n,
-            Err(_) => continue,
+            Err(_) => {
+                drop(conn);
+                continue;
+            },
         };
-
-        let backup_pw_str = match db::MetadataRepo::get(conn.inner(), "backup_password") {
-            Ok(Some(p)) => p,
-            _ => continue,
-        };
-        let backup_pw = secrecy::Secret::new(backup_pw_str);
 
         let last_backup = db::MetadataRepo::get(conn.inner(), "last_icloud_backup")
             .ok()
@@ -264,19 +268,43 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
             .as_secs();
 
         if now < last_backup + interval_secs {
-            continue; // 还没到时间
+            drop(conn);
+            continue; // 还没到时间，先释放连接节省资源
         }
 
-        // 执行自动备份
+        // 到达备份时间点，读取备份密码
+        let mut backup_pw_str = match db::MetadataRepo::get(conn.inner(), "backup_password") {
+            Ok(Some(p)) => p,
+            _ => {
+                drop(conn);
+                continue;
+            },
+        };
+        let backup_pw = secrecy::Secret::new(backup_pw_str.clone());
+        // 清除原始密码字符串内存
+        unsafe {
+            std::ptr::write_bytes(backup_pw_str.as_ptr() as *mut u8, 0, backup_pw_str.len());
+        }
+
+        // 连接当前仍有效，直接用于备份数据读取
         let entries = match db::EntryRepo::list_all(conn.inner()) {
             Ok(e) => e,
-            Err(_) => continue,
+            Err(_) => {
+                drop(conn);
+                continue;
+            },
         };
 
         let data = match serde_json::to_string_pretty(&entries) {
             Ok(d) => d,
-            Err(_) => continue,
+            Err(_) => {
+                drop(conn);
+                continue;
+            },
         };
+
+        // 备份数据读取完毕，可以释放数据库连接
+        drop(conn);
 
         let encrypted = match crypto::backup::encrypt_backup(&backup_pw, data.as_bytes()) {
             Ok(e) => e,
@@ -295,6 +323,11 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
         if let Err(e) = std::fs::write(&path, &encrypted) {
             log::warn!("iCloud 自动备份写入失败: {}", e);
         } else {
+            // 写入成功后需要再打开连接更新 last_icloud_backup
+            let conn = match db::Connection::open_with_key(&db_path, &key) {
+                Ok(c) => c,
+                Err(_) => continue,
+            };
             let _ = db::MetadataRepo::set(conn.inner(), "last_icloud_backup", &now.to_string());
         }
     }

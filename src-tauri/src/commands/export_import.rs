@@ -13,9 +13,8 @@ pub async fn export_backup(
 	password: String,
 	output_path: Option<String>,
 ) -> Result<ExportResult, AppError> {
-	let key = commands::ensure_unlocked(&state)?;
-	let db_path = db::connection::get_db_path(&state.db_dir);
-	let conn = db::Connection::open_with_key(&db_path, &key)?;
+	let mut db_conn = commands::get_connection(&state)?;
+	let conn = db_conn.as_mut().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
 
 	let entries = db::EntryRepo::list_all(conn.inner())?;
 	let data = serde_json::to_string_pretty(&entries)?;
@@ -36,20 +35,19 @@ pub async fn export_backup(
 	})
 }
 
-/// 从加密备份文件导入条目
+/// 从加密备份文件导入条目（带事务保护）
 #[tauri::command]
 pub async fn import_backup(
 	state: State<'_, AppState>,
 	password: String,
 	input_path: String,
 ) -> Result<ImportResult, AppError> {
-	let key = commands::ensure_unlocked(&state)?;
-	let db_path = db::connection::get_db_path(&state.db_dir);
-	let conn = db::Connection::open_with_key(&db_path, &key)?;
+	let mut db_conn = commands::get_connection(&state)?;
+	let conn = db_conn.as_mut().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
 
 	let path = PathBuf::from(&input_path);
 	if !path.exists() {
-		return Err(AppError::Other(format!("文件不存在: {}", input_path)));
+		return Err(AppError::Other("指定的备份文件不存在".to_string()));
 	}
 
 	let backup_pw = Secret::new(password);
@@ -58,11 +56,14 @@ pub async fn import_backup(
 
 	let entries: Vec<db::entries::Entry> = serde_json::from_slice(&decrypted)?;
 
+	// 使用事务保证导入的原子性
+	let tx = conn.inner_mut().transaction()?;
+
 	let mut imported = 0u64;
 	let mut skipped = 0u64;
 	for entry in &entries {
 		// 检查 ID 是否已存在
-		let exists = conn.inner().query_row(
+		let exists = tx.query_row(
 			"SELECT 1 FROM entries WHERE id = ?1",
 			rusqlite::params![entry.id],
 			|_| Ok(()),
@@ -71,7 +72,7 @@ pub async fn import_backup(
 		if exists {
 			skipped += 1;
 		} else {
-			conn.inner().execute(
+			tx.execute(
 				"INSERT INTO entries (id, entry_type, name, fields, created_at, updated_at)
 				 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
 				rusqlite::params![
@@ -86,6 +87,8 @@ pub async fn import_backup(
 			imported += 1;
 		}
 	}
+
+	tx.commit()?;
 
 	Ok(ImportResult { imported, skipped })
 }

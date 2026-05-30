@@ -1,20 +1,18 @@
 use serde::Serialize;
 use tauri::State;
 
+use crate::commands;
 use crate::commands::auth::AppState;
-use crate::crypto::keychain::LockState;
 use crate::db;
-use crate::error::{AppError, AppResult};
+use crate::error::AppError;
 
 /// 列出所有条目
 #[tauri::command]
 pub async fn list_entries(
     state: State<'_, AppState>,
 ) -> Result<Vec<db::entries::Entry>, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::list_all(conn.inner())
 }
 
@@ -24,10 +22,8 @@ pub async fn get_entry(
     state: State<'_, AppState>,
     id: String,
 ) -> Result<db::entries::Entry, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::get_by_id(conn.inner(), &id)
 }
 
@@ -37,10 +33,8 @@ pub async fn create_entry(
     state: State<'_, AppState>,
     params: db::entries::CreateEntryParams,
 ) -> Result<db::entries::Entry, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::create(conn.inner(), &params)
 }
 
@@ -51,10 +45,8 @@ pub async fn update_entry(
     id: String,
     params: db::entries::UpdateEntryParams,
 ) -> Result<db::entries::Entry, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::update(conn.inner(), &id, &params)
 }
 
@@ -64,10 +56,8 @@ pub async fn delete_entry(
     state: State<'_, AppState>,
     id: String,
 ) -> Result<DeleteResult, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::delete(conn.inner(), &id)?;
 
     Ok(DeleteResult { success: true })
@@ -79,10 +69,8 @@ pub async fn search_entries(
     state: State<'_, AppState>,
     query: String,
 ) -> Result<Vec<db::entries::Entry>, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::search(conn.inner(), &query)
 }
 
@@ -92,20 +80,9 @@ pub async fn list_entries_by_type(
     state: State<'_, AppState>,
     entry_type: String,
 ) -> Result<Vec<db::entries::Entry>, AppError> {
-    let key = ensure_unlocked(&state)?;
-    let db_path = db::connection::get_db_path(&state.db_dir);
-
-    let conn = db::Connection::open_with_key(&db_path, &key)?;
+    let db_conn = commands::get_connection(&state)?;
+    let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
     db::EntryRepo::list_by_type(conn.inner(), &entry_type)
-}
-
-/// 确保已解锁并返回派生密钥
-fn ensure_unlocked(state: &State<'_, AppState>) -> AppResult<[u8; 32]> {
-    let lock_state = state.keychain.get_lock_state()?;
-    if lock_state != LockState::Unlocked {
-        return Err(AppError::LockState("保险箱已锁定".to_string()));
-    }
-    state.keychain.get_key()
 }
 
 #[derive(Serialize)]

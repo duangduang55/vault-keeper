@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Shield, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { PasswordStrength } from './PasswordStrength';
+import { AppLogo } from './common/AppLogo';
+import { APP_NAME } from '../lib/appConfig';
 
 export function SetupView() {
   const [password, setPassword] = useState('');
@@ -37,12 +39,12 @@ export function SetupView() {
       <div className="w-full max-w-sm animate-scale-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[14px] bg-primary-500/10 mb-5 mx-auto">
-            <Shield className="w-8 h-8 text-primary-500" />
+          <div className="mb-5 mx-auto">
+            <AppLogo size={64} className="rounded-[16px]" />
           </div>
           <h1 className="text-2xl font-semibold text-surface-100 tracking-tight">设置主密码</h1>
           <p className="text-sm text-surface-400 mt-2 leading-relaxed">
-            首次使用 Vault Keeper。<br />请设置一个强密码来保护您的敏感信息。
+            首次使用{APP_NAME}。<br />请设置一个强密码来保护您的敏感信息。
           </p>
         </div>
 

@@ -75,14 +75,17 @@ pub fn encrypt_backup(
 
     // 从密码派生密钥
     let key = derive_backup_key(password, &salt)?;
-    let key = aes_gcm::Key::<Aes256Gcm>::from_slice(key.expose_secret());
-    let cipher = Aes256Gcm::new(key);
+    let aes_key = aes_gcm::Key::<Aes256Gcm>::from_slice(key.expose_secret());
+    let cipher = Aes256Gcm::new(aes_key);
     let nonce = Nonce::from_slice(&nonce_bytes);
 
     // AES-256-GCM 加密（自动附加认证标签）
     let ciphertext = cipher
         .encrypt(nonce, plaintext)
         .map_err(|e| AppError::Crypto(format!("AES-GCM 加密失败: {}", e)))?;
+
+    // 显式丢弃 cipher 和 key，释放敏感内存后 zeroize
+    drop(cipher);
 
     // 输出格式: salt || nonce || ciphertext_with_tag
     let mut result = Vec::with_capacity(SALT_SIZE + NONCE_SIZE + ciphertext.len());
@@ -118,14 +121,17 @@ pub fn decrypt_backup(
 
     // 从密码派生密钥
     let key = derive_backup_key(password, &salt)?;
-    let key = aes_gcm::Key::<Aes256Gcm>::from_slice(key.expose_secret());
-    let cipher = Aes256Gcm::new(key);
+    let aes_key = aes_gcm::Key::<Aes256Gcm>::from_slice(key.expose_secret());
+    let cipher = Aes256Gcm::new(aes_key);
     let nonce = Nonce::from_slice(&nonce_bytes);
 
     // AES-256-GCM 解密（自动验证认证标签）
     let plaintext = cipher
         .decrypt(nonce, &data[header_size..])
         .map_err(|_| AppError::Crypto("备份解密失败: 密码错误或数据已被篡改".to_string()))?;
+
+    // 显式丢弃 cipher，释放敏感内存
+    drop(cipher);
 
     Ok(plaintext)
 }

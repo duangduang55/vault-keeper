@@ -12,9 +12,8 @@ pub async fn copy_to_clipboard(
 	entry_id: String,
 	field_key: String,
 ) -> Result<ClipboardResult, AppError> {
-	let key = commands::ensure_unlocked(&state)?;
-	let db_path = db::connection::get_db_path(&state.db_dir);
-	let conn = db::Connection::open_with_key(&db_path, &key)?;
+	let db_conn = commands::get_connection(&state)?;
+	let conn = db_conn.as_ref().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
 
 	let entry = db::EntryRepo::get_by_id(conn.inner(), &entry_id)?;
 	let fields: std::collections::HashMap<String, String> =

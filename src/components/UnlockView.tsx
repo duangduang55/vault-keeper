@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+import { AppLogo } from './common/AppLogo';
+import { APP_NAME } from '../lib/appConfig';
 
 export function UnlockView() {
   const [password, setPassword] = useState('');
@@ -21,10 +23,10 @@ export function UnlockView() {
       <div className="w-full max-w-sm animate-scale-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[14px] bg-primary-500/10 mb-5 mx-auto">
-            <Shield className="w-8 h-8 text-primary-500" />
+          <div className="mb-5 mx-auto">
+            <AppLogo size={64} className="rounded-[16px]" />
           </div>
-          <h1 className="text-2xl font-semibold text-surface-100 tracking-tight">Vault Keeper</h1>
+          <h1 className="text-2xl font-semibold text-surface-100 tracking-tight">{APP_NAME}</h1>
           <p className="text-sm text-surface-400 mt-2">输入主密码解锁保险箱</p>
         </div>
 

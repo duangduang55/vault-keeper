@@ -2,7 +2,7 @@
 
 > 你的私人密码保险箱。纯本地运行，Argon2id + SQLCipher 零信任加密。
 
-**v1.0.0** · macOS 14+
+**v1.1.0** · macOS 14+
 
 ---
 
@@ -95,6 +95,26 @@ npm run tauri build
 - **Rust 工具链** — 通过 [rustup](https://rustup.rs) 安装
 - **SQLCipher** — macOS: `brew install sqlcipher`
 - **Xcode Command Line Tools** — `xcode-select --install`
+
+---
+
+## 📦 更新日志
+
+### v1.1.0 (2026-05-30)
+
+**安全加固**
+- `SQLCipher` PRAGMA 顺序修复：`secure_delete` / `cipher_memory_security` 在 `PRAGMA key` 之前设置
+- 持久化 DB 连接代替每次命令新建连接，避免密钥反复暴露
+- 备份密码 / 中间密钥使用后内存自动清零（zeroize）
+- 错误信息不再暴露内部路径信息
+
+**代码质量**
+- 消除 `ensure_unlocked` 代码重复、移除死代码 `useDebounce`
+- Keychain 多锁合并为单 Mutex，消除死锁风险
+- 导入/恢复操作包裹数据库事务保证原子性
+- 快捷键存储加入格式验证
+- 移除未使用依赖 `arboard`
+- 密码修改错误提示改为用户友好描述
 
 ---
 

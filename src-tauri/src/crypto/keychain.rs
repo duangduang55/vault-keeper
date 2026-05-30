@@ -18,62 +18,75 @@ pub enum LockState {
     Unlocked,
 }
 
+/// 内部状态（单 Mutex 保护，消除多锁死锁风险）
+struct KeychainInner {
+    /// 当前持有的派生密钥（Secret 在 Drop 时 zeroize）
+    key: Option<Secret<[u8; 32]>>,
+    /// 锁定状态
+    lock_state: LockState,
+    /// 解锁时间
+    unlocked_at: Option<Instant>,
+    /// 自动锁定超时（秒）
+    auto_lock_seconds: u64,
+}
+
 /// 密钥管理器 - 管理派生密钥的完整生命周期
 pub struct Keychain {
-    /// 当前持有的派生密钥（Secret 在 Drop 时 zeroize）
-    key: Mutex<Option<Secret<[u8; 32]>>>,
-    /// 锁定状态
-    lock_state: Mutex<LockState>,
-    /// 解锁时间
-    unlocked_at: Mutex<Option<Instant>>,
-    /// 自动锁定超时（秒）
-    auto_lock_seconds: Mutex<u64>,
+    inner: Mutex<KeychainInner>,
 }
 
 impl Keychain {
     /// 创建新的密钥管理器（未初始化状态）
     pub fn new() -> Self {
         Self {
-            key: Mutex::new(None),
-            lock_state: Mutex::new(LockState::Uninitialized),
-            unlocked_at: Mutex::new(None),
-            auto_lock_seconds: Mutex::new(DEFAULT_AUTO_LOCK_SECONDS),
+            inner: Mutex::new(KeychainInner {
+                key: None,
+                lock_state: LockState::Uninitialized,
+                unlocked_at: None,
+                auto_lock_seconds: DEFAULT_AUTO_LOCK_SECONDS,
+            }),
         }
     }
 
     /// 设置派生密钥（解锁或初始化后调用）
     pub fn set_key(&self, derived_key: Secret<[u8; 32]>) -> AppResult<()> {
-        let mut key = self.key.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取密钥锁失败: {}", e))
         })?;
-        *key = Some(derived_key);
-
-        let mut state = self.lock_state.lock().map_err(|e| {
-            AppError::LockState(format!("获取状态锁失败: {}", e))
-        })?;
-        *state = LockState::Unlocked;
-
-        let mut unlocked = self.unlocked_at.lock().map_err(|e| {
-            AppError::LockState(format!("获取时间锁失败: {}", e))
-        })?;
-        *unlocked = Some(Instant::now());
-
+        inner.key = Some(derived_key);
+        inner.lock_state = LockState::Unlocked;
+        inner.unlocked_at = Some(Instant::now());
         Ok(())
     }
 
     /// 获取密钥（用于数据库操作等）
     /// 先检查自动锁定，再标记用户活跃
     pub fn get_key(&self) -> AppResult<[u8; 32]> {
-        // 先检查自动锁定，避免在持有 key 锁时调用 lock() 导致死锁
-        self.check_auto_lock()?;
-        // 能走到这里说明未超时锁定，标记用户活跃以重置计时器
-        self.mark_activity()?;
-
-        let key = self.key.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取密钥锁失败: {}", e))
         })?;
 
-        match key.as_ref() {
+        // 先检查自动锁定
+        if inner.lock_state == LockState::Unlocked {
+            if let Some(unlocked_time) = inner.unlocked_at {
+                if unlocked_time.elapsed() >= Duration::from_secs(inner.auto_lock_seconds) {
+                    // 超时锁定
+                    inner.key = None;
+                    inner.lock_state = LockState::Locked;
+                    inner.unlocked_at = None;
+                    return Err(AppError::LockState("保险箱已自动锁定".to_string()));
+                }
+            }
+        }
+
+        if inner.lock_state != LockState::Unlocked {
+            return Err(AppError::LockState("保险箱已锁定".to_string()));
+        }
+
+        // 标记用户活跃（重置自动锁定计时器）
+        inner.unlocked_at = Some(Instant::now());
+
+        match inner.key.as_ref() {
             Some(k) => {
                 let mut result = [0u8; 32];
                 result.copy_from_slice(k.expose_secret());
@@ -85,14 +98,23 @@ impl Keychain {
 
     /// 获取密钥但不重置自动锁定计时器（用于后台任务如自动备份）
     pub fn peek_key(&self) -> AppResult<[u8; 32]> {
-        // 检查自动锁定（可能触发锁定），但不标记用户活跃
-        self.check_auto_lock()?;
-
-        let key = self.key.lock().map_err(|e| {
+        let inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取密钥锁失败: {}", e))
         })?;
 
-        match key.as_ref() {
+        // 检查自动锁定（可能触发锁定），但不标记用户活跃
+        if inner.lock_state != LockState::Unlocked {
+            return Err(AppError::LockState("保险箱已锁定".to_string()));
+        }
+
+        if let Some(unlocked_time) = inner.unlocked_at {
+            if unlocked_time.elapsed() >= Duration::from_secs(inner.auto_lock_seconds) {
+                // 不能在这里自动锁定（因为持有锁），让调用方重试
+                return Err(AppError::LockState("保险箱已自动锁定".to_string()));
+            }
+        }
+
+        match inner.key.as_ref() {
             Some(k) => {
                 let mut result = [0u8; 32];
                 result.copy_from_slice(k.expose_secret());
@@ -104,60 +126,49 @@ impl Keychain {
 
     /// 锁定保险箱（清除内存中的密钥）
     pub fn lock(&self) -> AppResult<()> {
-        let mut key = self.key.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取密钥锁失败: {}", e))
         })?;
-
-        // 通过设置新值然后用 zeroize 清除
-        if let Some(ref mut _k) = *key {
-            // 旧值会在 Secret 的 Drop 实现中被 zeroize 清除
-        }
-        *key = None;
-
-        let mut state = self.lock_state.lock().map_err(|e| {
-            AppError::LockState(format!("获取状态锁失败: {}", e))
-        })?;
-        *state = LockState::Locked;
-
-        let mut unlocked = self.unlocked_at.lock().map_err(|e| {
-            AppError::LockState(format!("获取时间锁失败: {}", e))
-        })?;
-        *unlocked = None;
-
+        // 通过设置 None 释放旧密钥（Secret 的 Drop 自动 zeroize）
+        inner.key = None;
+        inner.lock_state = LockState::Locked;
+        inner.unlocked_at = None;
         Ok(())
     }
 
     /// 获取当前锁定状态
     pub fn get_lock_state(&self) -> AppResult<LockState> {
-        self.lock_state.lock()
-            .map(|s| s.clone())
-            .map_err(|e| AppError::LockState(format!("获取状态锁失败: {}", e)))
+        let inner = self.inner.lock().map_err(|e| {
+            AppError::LockState(format!("获取状态锁失败: {}", e))
+        })?;
+        Ok(inner.lock_state.clone())
     }
 
     /// 设置自动锁定时间（秒）
     pub fn set_auto_lock_seconds(&self, seconds: u64) -> AppResult<()> {
-        let mut t = self.auto_lock_seconds.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取配置锁失败: {}", e))
         })?;
-        *t = seconds;
+        inner.auto_lock_seconds = seconds;
         Ok(())
     }
 
     /// 获取自动锁定时间（秒）
     #[allow(dead_code)]
     pub fn get_auto_lock_seconds(&self) -> AppResult<u64> {
-        self.auto_lock_seconds.lock()
-            .map(|t| *t)
-            .map_err(|e| AppError::LockState(format!("获取配置锁失败: {}", e)))
+        let inner = self.inner.lock().map_err(|e| {
+            AppError::LockState(format!("获取配置锁失败: {}", e))
+        })?;
+        Ok(inner.auto_lock_seconds)
     }
 
     /// 标记为已初始化（首次设置主密码后调用）
     pub fn mark_initialized(&self) -> AppResult<()> {
-        let mut state = self.lock_state.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取状态锁失败: {}", e))
         })?;
-        if *state == LockState::Uninitialized {
-            *state = LockState::Unlocked;
+        if inner.lock_state == LockState::Uninitialized {
+            inner.lock_state = LockState::Unlocked;
         }
         Ok(())
     }
@@ -165,42 +176,30 @@ impl Keychain {
     /// 检查是否超过自动锁定时间，如果是则自动锁定
     /// 与 mark_activity 分离：本方法只检查不重置计时器
     pub fn check_auto_lock(&self) -> AppResult<()> {
-        let state = self.lock_state.lock().map_err(|e| {
+        let mut inner = self.inner.lock().map_err(|e| {
             AppError::LockState(format!("获取状态锁失败: {}", e))
         })?;
 
-        if *state != LockState::Unlocked {
-            return Ok(());
-        }
-        drop(state);
-
-        let unlocked = self.unlocked_at.lock().map_err(|e| {
-            AppError::LockState(format!("获取时间锁失败: {}", e))
-        })?;
-
-        let auto_lock = self.auto_lock_seconds.lock().map_err(|e| {
-            AppError::LockState(format!("获取配置锁失败: {}", e))
-        })?;
-
-        if let Some(unlocked_time) = *unlocked {
-            if unlocked_time.elapsed() >= Duration::from_secs(*auto_lock) {
-                drop(unlocked);
-                drop(auto_lock);
-                self.lock()?;
+        // 检查自动锁定条件
+        if let Some(unlocked_time) = inner.unlocked_at {
+            if unlocked_time.elapsed() >= Duration::from_secs(inner.auto_lock_seconds) {
+                inner.key = None;
+                inner.lock_state = LockState::Locked;
+                inner.unlocked_at = None;
             }
-            // 不重置计时器 — 由 mark_activity 负责
         }
 
         Ok(())
     }
 
     /// 标记用户活跃，重置自动锁定计时器
+    #[allow(dead_code)]
     pub fn mark_activity(&self) -> AppResult<()> {
-        let mut unlocked = self.unlocked_at.lock().map_err(|e| {
-            AppError::LockState(format!("获取时间锁失败: {}", e))
+        let mut inner = self.inner.lock().map_err(|e| {
+            AppError::LockState(format!("获取状态锁失败: {}", e))
         })?;
-        if unlocked.is_some() {
-            *unlocked = Some(Instant::now());
+        if inner.lock_state == LockState::Unlocked {
+            inner.unlocked_at = Some(Instant::now());
         }
         Ok(())
     }

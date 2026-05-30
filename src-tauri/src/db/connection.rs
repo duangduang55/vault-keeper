@@ -37,22 +37,26 @@ impl Connection {
         }
         let conn = SqliteConnection::open(db_path)?;
 
+        // SQLCipher 要求 cipher 相关 PRAGMA 必须在 PRAGMA key 之前设置
+        conn.execute_batch(
+            "PRAGMA cipher_memory_security = ON;
+             PRAGMA secure_delete = ON;",
+        )?;
+
         // 使用 PRAGMA key 设置加密密钥
         let key_hex = hex::encode(key);
         conn.execute_batch(&format!("PRAGMA key = \"x'{}'\";", key_hex))?;
 
+        // 设置非 cipher PRAGMA（这些可以在 key 之后设置）
+        conn.execute_batch(
+            "PRAGMA journal_mode = WAL;
+             PRAGMA foreign_keys = ON;",
+        )?;
+
         // 验证密钥是否正确（尝试读取一条记录）
         match conn.query_row("SELECT COUNT(*) FROM sqlite_master", [], |_| Ok(())) {
-            Ok(()) => {
-                conn.execute_batch(
-                    "PRAGMA cipher_memory_security = ON;
-                     PRAGMA journal_mode = WAL;
-                     PRAGMA foreign_keys = ON;
-                     PRAGMA secure_delete = ON;",
-                )?;
-                Ok(Self { conn })
-            }
-            Err(e) => Err(AppError::Auth(format!("数据库密钥验证失败: {}", e))),
+            Ok(()) => Ok(Self { conn }),
+            Err(_) => Err(AppError::Auth("主密码验证失败，请确认密码正确".to_string())),
         }
     }
 
@@ -67,6 +71,11 @@ impl Connection {
     /// 获取内部连接引用
     pub fn inner(&self) -> &SqliteConnection {
         &self.conn
+    }
+
+    /// 获取内部连接的可变引用（用于事务等需要 &mut self 的操作）
+    pub fn inner_mut(&mut self) -> &mut SqliteConnection {
+        &mut self.conn
     }
 }
 

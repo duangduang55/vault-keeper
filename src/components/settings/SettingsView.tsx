@@ -8,6 +8,7 @@ import { ShortcutRecorder } from './ShortcutRecorder'
 import { toast } from '../common/Toast'
 import { useThemeStore } from '../../stores/themeStore'
 import type { AppConfig } from '../../types/common'
+import { APP_NAME, APP_DESCRIPTION } from '../../lib/appConfig'
 
 interface SettingsViewProps {
   onBack: () => void
@@ -173,7 +174,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
             <Keyboard size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">唤出快捷键</h3>
           </div>
-          <p className="text-xs text-surface-500">设置全局快捷键快速唤出或隐藏 Vault Keeper 窗口</p>
+          <p className="text-xs text-surface-500">设置全局快捷键快速唤出或隐藏 {APP_NAME} 窗口</p>
           <p className="text-xs text-surface-400">当前: <code className="bg-surface-900 px-1.5 py-0.5 rounded-[4px] text-primary-400 text-[11px]">{shortcut}</code></p>
           <div className="flex gap-2">
             <ShortcutRecorder value={shortcutInput} onChange={setShortcutInput} />
@@ -255,8 +256,8 @@ export function SettingsView({ onBack }: SettingsViewProps) {
 
         {/* About */}
         <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-2">
-          <h3 className="text-sm font-medium text-surface-100">关于 Vault Keeper</h3>
-          <p className="text-xs text-surface-400">版本 {appVersion || '0.2.0'}</p>
+          <h3 className="text-sm font-medium text-surface-100">关于 {APP_NAME}</h3>
+          <p className="text-xs text-surface-400">{APP_NAME} v{appVersion || '0.2.0'} — {APP_DESCRIPTION}</p>
           <p className="text-xs text-surface-500">基于 Tauri 2.0 + React + SQLCipher 构建</p>
           <p className="text-xs text-surface-500">所有数据使用主密码 + AES-256 加密存储在本地</p>
         </section>
