@@ -38,34 +38,35 @@
 
 /* ===== 主题系统 — CSS 自定义属性 ===== */
 
-/* 亮色模式（默认）：冷石板灰 — 与图标 #1E293B 一致 */
+/* 亮色模式（默认）：冷石板灰 — 与图标 #1E293B 一致
+   使用 RGB 三原色格式以便 Tailwind 透明度修饰符正确工作 */
 :root {
-  --color-surface-950: #f8fafc;
-  --color-surface-900: #f1f5f9;
-  --color-surface-800: #e2e8f0;
-  --color-surface-700: #cbd5e1;
-  --color-surface-600: #94a3b8;
-  --color-surface-500: #64748b;
-  --color-surface-400: #475569;
-  --color-surface-300: #334155;
-  --color-surface-200: #1e293b;
-  --color-surface-100: #0f172a;
-  --color-surface-50:  #020617;
+  --color-surface-950-rgb: 248 250 252;
+  --color-surface-900-rgb: 241 245 249;
+  --color-surface-800-rgb: 226 232 240;
+  --color-surface-700-rgb: 203 213 225;
+  --color-surface-600-rgb: 148 163 184;
+  --color-surface-500-rgb: 100 116 139;
+  --color-surface-400-rgb: 71 85 105;
+  --color-surface-300-rgb: 51 65 85;
+  --color-surface-200-rgb: 30 41 59;
+  --color-surface-100-rgb: 15 23 42;
+  --color-surface-50-rgb:  2 6 23;
 }
 
 /* 暗色模式：Apple 深色灰阶 */
 .dark {
-  --color-surface-950: #000000;
-  --color-surface-900: #1c1c1e;
-  --color-surface-800: #2c2c2e;
-  --color-surface-700: #3a3a3c;
-  --color-surface-600: #48484a;
-  --color-surface-500: #636366;
-  --color-surface-400: #8e8e93;
-  --color-surface-300: #aeaeb2;
-  --color-surface-200: #d1d1d6;
-  --color-surface-100: #e5e5ea;
-  --color-surface-50:  #f2f2f7;
+  --color-surface-950-rgb: 0 0 0;
+  --color-surface-900-rgb: 28 28 30;
+  --color-surface-800-rgb: 44 44 46;
+  --color-surface-700-rgb: 44 44 46;
+  --color-surface-600-rgb: 72 72 74;
+  --color-surface-500-rgb: 99 99 102;
+  --color-surface-400-rgb: 142 142 147;
+  --color-surface-300-rgb: 174 174 178;
+  --color-surface-200-rgb: 209 209 214;
+  --color-surface-100-rgb: 229 229 234;
+  --color-surface-50-rgb:  242 242 247;
 }
 
 @layer base {
