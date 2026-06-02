@@ -76,7 +76,7 @@ export function PasswordGenerator({ open, onClose, onGenerate }: PasswordGenerat
     <Modal open={open} onClose={onClose} title="密码生成器" size="sm">
       <div className="space-y-4">
         {password && (
-          <div className="bg-surface-800 border border-surface-800 rounded-[10px] p-3">
+          <div className="bg-surface-800 border border-surface-700/50 rounded p-3">
             <p className="text-base font-mono text-center text-surface-100 break-all select-all tracking-wide">{password}</p>
             <div className="mt-2.5 flex gap-1">
               {[...Array(6)].map((_, i) => (

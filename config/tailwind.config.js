@@ -41,9 +41,10 @@ export default {
         mono: ['"SF Mono"', 'SFMono-Regular', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],
       },
       borderRadius: {
-        sm: '6px',
-        DEFAULT: '10px',
-        lg: '14px',
+        sm: '10px',
+        DEFAULT: '16px',
+        lg: '24px',
+        xl: '32px',
       },
     },
   },

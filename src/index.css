@@ -21,21 +21,36 @@
 .animate-fade-in { animation: fade-in 0.2s ease-out; }
 .animate-scale-in { animation: scale-in 0.2s ease-out; }
 
+/* ===== 保险柜门环形动画 ===== */
+@keyframes vault-ring {
+  0% { stroke-dashoffset: 1200; opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes vault-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.vault-ring { animation: vault-ring 1.2s ease-out forwards; }
+.vault-pulse { animation: vault-pulse 3s ease-in-out infinite; }
+
 /* ===== 主题系统 — CSS 自定义属性 ===== */
 
-/* 亮色模式（默认）：低对比度暖色系 — 柔和护眼 */
+/* 亮色模式（默认）：冷石板灰 — 与图标 #1E293B 一致 */
 :root {
-  --color-surface-950: #f4f1ec;
-  --color-surface-900: #faf8f4;
-  --color-surface-800: #e8e4dd;
-  --color-surface-700: #ddd9d2;
-  --color-surface-600: #cec9c2;
-  --color-surface-500: #aeaaa4;
-  --color-surface-400: #96918c;
-  --color-surface-300: #7a7671;
-  --color-surface-200: #5e5a55;
-  --color-surface-100: #4d4945;
-  --color-surface-50:  #302d29;
+  --color-surface-950: #f8fafc;
+  --color-surface-900: #f1f5f9;
+  --color-surface-800: #e2e8f0;
+  --color-surface-700: #cbd5e1;
+  --color-surface-600: #94a3b8;
+  --color-surface-500: #64748b;
+  --color-surface-400: #475569;
+  --color-surface-300: #334155;
+  --color-surface-200: #1e293b;
+  --color-surface-100: #0f172a;
+  --color-surface-50:  #020617;
 }
 
 /* 暗色模式：Apple 深色灰阶 */

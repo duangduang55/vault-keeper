@@ -311,8 +311,8 @@ async fn auto_backup_loop(app_handle: tauri::AppHandle) {
             Err(_) => continue,
         };
 
-        // 写入 iCloud Drive
-        let icloud_dir = commands::icloud::icloud_dir();
+        // 写入备份目录
+        let icloud_dir = commands::icloud::icloud_dir(Some(&state.db_dir));
         std::fs::create_dir_all(&icloud_dir).ok();
 
         let ts = OffsetDateTime::now_local()

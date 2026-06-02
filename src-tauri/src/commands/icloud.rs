@@ -7,16 +7,40 @@ use crate::commands::auth::AppState;
 use crate::{commands, crypto, db, error::AppError};
 use time::OffsetDateTime;
 
-/// iCloud Drive 备份目录
-pub fn icloud_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
-    PathBuf::from(home).join("Library/Mobile Documents/com~apple~CloudDocs/VaultKeeper")
+/// iCloud Drive 备份目录（跨平台适配）
+///
+/// 优先级：
+/// 1. VAULT_KEEPER_ICLOUD_DIR 环境变量
+/// 2. macOS: iCloud Drive 路径（如可用）
+/// 3. 传入的 app_data_dir/backups（如有）
+/// 4. ~/VaultKeeper/backups（通用回退）
+pub fn icloud_dir(app_data_dir: Option<&PathBuf>) -> PathBuf {
+    if let Ok(dir) = std::env::var("VAULT_KEEPER_ICLOUD_DIR") {
+        return PathBuf::from(dir);
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let icloud = PathBuf::from(home)
+            .join("Library/Mobile Documents/com~apple~CloudDocs/VaultKeeper");
+        if icloud.parent().map(|p| p.exists()).unwrap_or(false) {
+            return icloud;
+        }
+    }
+    if let Some(dir) = app_data_dir {
+        dir.join("backups")
+    } else {
+        let home = std::env::var("HOME")
+            .or_else(|_| std::env::var("USERPROFILE"))
+            .unwrap_or_else(|_| ".".to_string());
+        PathBuf::from(home).join("VaultKeeper").join("backups")
+    }
 }
 
 /// 检查 iCloud Drive 是否可用
 #[tauri::command]
 pub async fn get_icloud_status() -> Result<IcloudStatus, AppError> {
-    let dir = icloud_dir();
+    let dir = icloud_dir(None);
     let available = dir.exists();
     Ok(IcloudStatus {
         available,
@@ -39,8 +63,8 @@ pub async fn icloud_backup(
     let backup_pw = Secret::new(password);
     let encrypted = crypto::backup::encrypt_backup(&backup_pw, data.as_bytes())?;
 
-    // 写入 iCloud Drive
-    let dir = icloud_dir();
+    // 写入备份目录
+    let dir = icloud_dir(Some(&state.db_dir));
     std::fs::create_dir_all(&dir)?;
 
     let now = formatted_now();
@@ -66,7 +90,7 @@ pub async fn icloud_backup(
 /// 列出 iCloud 中的备份文件
 #[tauri::command]
 pub async fn icloud_list_backups() -> Result<Vec<IcloudBackupFile>, AppError> {
-    let dir = icloud_dir();
+    let dir = icloud_dir(None);
     if !dir.exists() {
         return Ok(Vec::new());
     }
@@ -108,7 +132,7 @@ pub async fn icloud_restore(
     let mut db_conn = commands::get_connection(&state)?;
     let conn = db_conn.as_mut().ok_or_else(|| AppError::LockState("数据库连接未初始化".to_string()))?;
 
-    let path = icloud_dir().join(&filename);
+    let path = icloud_dir(Some(&state.db_dir)).join(&filename);
     if !path.exists() {
         return Err(AppError::Other("指定的备份文件不存在".to_string()));
     }

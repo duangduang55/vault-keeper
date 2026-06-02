@@ -111,7 +111,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                   <button
                     key={t.type}
                     onClick={() => { setType(t.type); setFields({}) }}
-                    className={`px-3 py-2.5 rounded-[10px] text-sm border transition-all duration-200
+                    className={`px-3 py-2.5 rounded text-sm border transition-all duration-200
                       ${type === t.type
                         ? 'border-primary-500 bg-primary-500/10 text-primary-400'
                         : 'border-surface-700 bg-surface-800 text-surface-300 hover:border-surface-500'
@@ -160,7 +160,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                         onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
                         placeholder={f.placeholder}
                         rows={4}
-                        className="w-full px-3 py-2 rounded-[10px] bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[80px] transition-all duration-200"
+                        className="w-full px-3 py-2 rounded bg-surface-800 border border-surface-700/50 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[80px] transition-all duration-200"
                       />
                     ) : (
                       <div className="relative">
@@ -246,7 +246,7 @@ export function EntryForm({ editEntry, onClose }: EntryFormProps) {
                               value={val}
                               onChange={(e) => setFields((prev) => ({ ...prev, [key]: e.target.value }))}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-[10px] bg-surface-800 border border-surface-700 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[60px] transition-all duration-200"
+                              className="w-full px-3 py-2 rounded bg-surface-800 border border-surface-700/50 text-surface-100 placeholder:text-surface-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-transparent resize-y min-h-[60px] transition-all duration-200"
                             />
                           ) : (
                             <Input

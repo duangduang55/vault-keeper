@@ -6,7 +6,7 @@ import { ToastContainer } from '../common/Toast'
 import { SearchBar } from '../vault/SearchBar'
 import { AppLogo } from '../common/AppLogo'
 import { useThemeStore } from '../../stores/themeStore'
-import { APP_NAME, APP_DESCRIPTION } from '../../lib/appConfig'
+import { APP_NAME } from '../../lib/appConfig'
 import type { Entry } from '../../types/entry'
 
 export function AppShell() {
@@ -32,12 +32,11 @@ export function AppShell() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-surface-950">
-      {/* 顶部栏：应用标识 + 搜索栏 — 同一行，横线在下方 */}
-      <div className="flex shrink-0 border-b border-surface-800">
-        <div className="w-56 flex items-center gap-1.5 px-4 py-2.5">
-          <AppLogo size={36} className="rounded-[10px] shrink-0" />
-          <span className="text-[15px] font-semibold text-surface-100 whitespace-nowrap shrink-0">{APP_NAME}</span>
-          <span className="text-[10px] text-surface-400 truncate">{APP_DESCRIPTION}</span>
+      {/* 顶部栏：应用标识 + 搜索栏 — 同一行 */}
+      <div className="flex shrink-0 border-b border-surface-700/50">
+        <div className="w-56 flex items-center gap-2 px-4 py-2.5">
+          <AppLogo size={34} className="rounded shrink-0" />
+          <span className="text-[14px] font-semibold text-surface-100 tracking-tight">{APP_NAME}</span>
         </div>
         {!showSettings && (
           <div className="flex-1">

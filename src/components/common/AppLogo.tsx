@@ -14,7 +14,8 @@ export function AppLogo({ size = 32, className = '' }: AppLogoProps) {
   useEffect(() => {
     const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
     let cleanup: string | null = null
-    invoke<number[]>('get_app_icon', { dark: isDark })
+    // 反色：暗色主题时左上角显示亮色图标，亮色主题时显示暗色图标
+    invoke<number[]>('get_app_icon', { dark: !isDark })
       .then((data) => {
         const blob = new Blob([new Uint8Array(data)], { type: 'image/png' })
         const url = URL.createObjectURL(blob)
@@ -27,8 +28,8 @@ export function AppLogo({ size = 32, className = '' }: AppLogoProps) {
 
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-[14px] overflow-hidden shrink-0 ${className}`}
-      style={{ width: size, height: size, minWidth: size, minHeight: size }}
+      className={`inline-flex items-center justify-center overflow-hidden shrink-0 ${className}`}
+      style={{ width: size, height: size, minWidth: size, minHeight: size, borderRadius: size * 0.2 }}
     >
       {iconUrl ? (
         <img src={iconUrl} alt="清密" className="w-full h-full object-cover" />

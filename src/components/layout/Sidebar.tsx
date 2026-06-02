@@ -35,16 +35,16 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
   }
 
   return (
-    <aside className="w-56 flex flex-col bg-surface-950 border-r border-surface-800">
+    <aside className="w-56 flex flex-col bg-surface-950 border-r border-surface-700/50">
       {/* 分类导航 */}
-      <nav className="flex-1 px-2 pt-2 pb-2 space-y-0.5 overflow-y-auto">
-        <p className="px-3 pt-1 pb-2 text-[11px] font-medium text-surface-400 uppercase tracking-wider">分类</p>
+      <nav className="flex-1 px-2.5 pt-3 pb-2 space-y-0.5 overflow-y-auto">
+        <p className="px-3 pb-2 text-[10px] font-semibold text-surface-500 uppercase tracking-[0.1em]">分类</p>
         <button
           onClick={() => handleCategoryClick(null)}
-          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-sm transition-all duration-200
-            ${!filterType ? 'bg-primary-500/10 text-primary-400' : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800'}`}
+          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm transition-all duration-200
+            ${!filterType ? 'bg-primary-500/8 text-primary-400 font-medium' : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800/60'}`}
         >
-          <List size={16} />
+          <List size={16} strokeWidth={1.8} />
           全部
         </button>
         {CATEGORY_TEMPLATES.map((t) => {
@@ -53,10 +53,10 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
             <button
               key={t.type}
               onClick={() => handleCategoryClick(t.type)}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-sm transition-all duration-200
-                ${filterType === t.type ? 'bg-primary-500/10 text-primary-400' : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800'}`}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded text-sm transition-all duration-200
+                ${filterType === t.type ? 'bg-primary-500/8 text-primary-400 font-medium' : 'text-surface-400 hover:text-surface-100 hover:bg-surface-800/60'}`}
             >
-              <Icon size={16} />
+              <Icon size={16} strokeWidth={1.8} />
               {t.label}
             </button>
           )
@@ -64,14 +64,14 @@ export function Sidebar({ onOpenSettings }: SidebarProps) {
       </nav>
 
       {/* 底部：设置 + 锁定 */}
-      <div className="px-2 py-2 border-t border-surface-800 space-y-0.5">
-        <Button variant="ghost" size="sm" className="w-full justify-start gap-2.5" onClick={onOpenSettings}>
-          <Settings size={16} />
+      <div className="px-2.5 py-2.5 border-t border-surface-700/50 space-y-0.5">
+        <Button variant="ghost" size="sm" className="w-full justify-start gap-2.5 text-surface-400" onClick={onOpenSettings}>
+          <Settings size={16} strokeWidth={1.8} />
           设置
         </Button>
         <div>
-          <Button variant="ghost" size="sm" className="w-full justify-start gap-2.5" onClick={() => lock()}>
-            <Lock size={16} />
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2.5 text-surface-400" onClick={() => lock()}>
+            <Lock size={16} strokeWidth={1.8} />
             锁定
           </Button>
           {lockShortcut && (

@@ -43,7 +43,7 @@ export function ToastContainer() {
         return (
           <div
             key={t.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-[10px] bg-surface-800 border border-surface-800 min-w-[280px] shadow-lg animate-slide-up`}
+            className={`flex items-center gap-3 px-4 py-3 rounded bg-surface-800 border border-surface-700/50 min-w-[280px] shadow-lg animate-slide-up`}
           >
             <Icon size={18} className={color} />
             <span className="text-sm text-surface-200 flex-1">{t.message}</span>

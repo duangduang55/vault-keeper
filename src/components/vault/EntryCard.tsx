@@ -56,28 +56,28 @@ export function EntryCard({ entry, selected, onSelect }: EntryCardProps) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(entry) } }}
       role="button"
       tabIndex={0}
-      className={`w-full text-left p-3.5 rounded-[10px] border transition-all duration-200 cursor-pointer
+      className={`group w-full text-left p-3.5 rounded border transition-all duration-200 cursor-pointer
         ${selected
-          ? 'border-primary-500/40 bg-primary-500/8'
-          : 'border-surface-800 bg-surface-800 hover:border-surface-600 hover:bg-surface-800/80'
+          ? 'border-primary-500/50 bg-primary-500/8 shadow-sm shadow-primary-500/5'
+          : 'border-surface-700/50 bg-surface-800/60 hover:border-surface-500/50 hover:bg-surface-800'
         }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-primary-400">{label}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-primary-400/80">{label}</span>
           </div>
           <h3 className="text-[15px] font-medium text-surface-100 truncate">{entry.name}</h3>
           <div className="flex items-center justify-between gap-2 mt-1">
             <span className="text-xs text-surface-500 truncate">{preview}</span>
             {primaryKey && (
-              <span onClick={(e) => e.stopPropagation()}>
+              <span onClick={(e) => e.stopPropagation()} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <CopyButton entryId={entry.id} fieldKey={primaryKey} />
               </span>
             )}
           </div>
         </div>
-        <span className="text-[11px] text-surface-500 whitespace-nowrap shrink-0 mt-0.5">{formatDate(entry.updated_at)}</span>
+        <span className="text-[10px] text-surface-500 whitespace-nowrap shrink-0 mt-0.5 font-medium">{formatDate(entry.updated_at)}</span>
       </div>
     </div>
   )

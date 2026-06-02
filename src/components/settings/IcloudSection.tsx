@@ -121,7 +121,7 @@ export function IcloudSection() {
 
   return (
     <>
-      <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+      <section className="bg-surface-800 border border-surface-800 rounded p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Cloud size={16} className="text-surface-400" />
           <h3 className="text-sm font-medium text-surface-100">iCloud 备份</h3>
@@ -151,7 +151,7 @@ export function IcloudSection() {
             <select
               value={backupInterval}
               onChange={(e) => handleIntervalChange(e.target.value)}
-              className="w-full bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+              className="w-full bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-200 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
             >
               <option value="0">关闭</option>
               <option value="3600">每小时</option>
@@ -187,7 +187,7 @@ export function IcloudSection() {
                   <button
                     key={f.filename}
                     onClick={() => setSelectedFile(f.filename)}
-                    className={`w-full text-left px-3 py-2 rounded-[8px] text-xs transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-sm text-xs transition-colors ${
                       selectedFile === f.filename
                         ? 'bg-primary-500/10 text-primary-400 border border-primary-500/30'
                         : 'text-surface-300 hover:bg-surface-700/50 border border-transparent'

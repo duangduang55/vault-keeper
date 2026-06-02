@@ -23,8 +23,8 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 animate-fade-in" onClick={onClose} />
-      <div className={`relative w-full ${sizeClasses[size]} bg-surface-900 border border-surface-800 rounded-[14px] shadow-xl animate-scale-in`}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className={`relative w-full ${sizeClasses[size]} bg-surface-900 border border-surface-700/50 rounded-lg shadow-2xl animate-scale-in`}>
         <div className="flex items-center justify-between px-5 py-4">
           <h2 className="text-base font-semibold text-surface-100">{title}</h2>
           <button onClick={onClose} className="p-1 rounded-lg text-surface-400 hover:text-surface-100 hover:bg-surface-800 transition-colors">

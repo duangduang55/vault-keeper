@@ -129,7 +129,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
 
       <div className="max-w-lg mx-auto p-4 space-y-3">
         {/* Auto Lock */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Clock size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">自动锁定</h3>
@@ -154,7 +154,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
                   max={60}
                   value={autoLockMinutes}
                   onChange={(e) => handleAutoLockChange(Number(e.target.value))}
-                  className="w-12 bg-surface-800 border border-surface-600 rounded-[6px] px-2 py-1 text-sm text-surface-200 text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                  className="w-12 bg-surface-800 border border-surface-600/50 rounded-sm px-2 py-1 text-sm text-surface-200 text-center focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                 />
                 <span className="text-xs text-surface-400">分钟</span>
               </div>
@@ -169,7 +169,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         <IcloudSection />
 
         {/* Global Shortcut */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Keyboard size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">唤出快捷键</h3>
@@ -185,7 +185,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         </section>
 
         {/* Lock Shortcut */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Lock size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">锁定快捷键</h3>
@@ -201,7 +201,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         </section>
 
         {/* Theme */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-3">
           <div className="flex items-center gap-2">
             <SunMoon size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">主题设置</h3>
@@ -220,7 +220,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         </section>
 
         {/* Change Master Password */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-3">
           <div className="flex items-center gap-2">
             <KeyRound size={16} className="text-surface-400" />
             <h3 className="text-sm font-medium text-surface-100">修改主密码</h3>
@@ -232,21 +232,21 @@ export function SettingsView({ onBack }: SettingsViewProps) {
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               placeholder="当前密码"
-              className="w-full bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+              className="w-full bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
             />
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="新密码"
-              className="w-full bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+              className="w-full bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
             />
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="确认新密码"
-              className="w-full bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+              className="w-full bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-100 placeholder-surface-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
             />
             <Button onClick={handleChangePassword} disabled={changingPassword} className="w-full">
               {changingPassword ? '修改中...' : '修改密码'}
@@ -255,7 +255,7 @@ export function SettingsView({ onBack }: SettingsViewProps) {
         </section>
 
         {/* About */}
-        <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-2">
+        <section className="bg-surface-800 border border-surface-700/50 rounded p-4 space-y-2">
           <h3 className="text-sm font-medium text-surface-100">关于 {APP_NAME}</h3>
           <p className="text-xs text-surface-400">{APP_NAME} v{appVersion || '0.2.0'} — {APP_DESCRIPTION}</p>
           <p className="text-xs text-surface-500">基于 Tauri 2.0 + React + SQLCipher 构建</p>
@@ -283,7 +283,7 @@ function ThemeOption({ value, current, onChange }: {
   return (
     <button
       onClick={() => onChange(value)}
-      className={`flex-1 flex flex-col items-center gap-2 px-3 py-3 rounded-[10px] text-sm transition-all duration-200 border
+      className={`flex-1 flex flex-col items-center gap-2 px-3 py-3 rounded text-sm transition-all duration-200 border
         ${isActive
           ? 'bg-primary-500/10 border-primary-500 text-primary-400'
           : 'bg-surface-900 border-surface-600 text-surface-400 hover:border-surface-500 hover:text-surface-300'

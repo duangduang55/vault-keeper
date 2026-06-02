@@ -37,7 +37,7 @@ export function VaultView({ showForm, editingEntry, onOpenForm, onEditEntry, onF
         </div>
 
         {selectedEntry && (
-          <div className="w-full lg:w-96 border-l border-surface-800 overflow-y-auto bg-surface-950">
+          <div className="w-full lg:w-96 border-l border-surface-700/50 overflow-y-auto bg-surface-950">
             <EntryDetail entry={selectedEntry} onEdit={() => onEditEntry(selectedEntry)} />
           </div>
         )}

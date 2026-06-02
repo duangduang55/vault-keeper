@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清密 · 图标重新设计</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #FAFAF9;
+    --surface: #FFFFFF;
+    --text: #1C1917;
+    --text-secondary: #78716C;
+    --border: #E7E5E4;
+    --accent: #1E3A5F;
+    --radius: 20px;
+  }
+  .dark {
+    --bg: #0C0A09;
+    --surface: #1C1917;
+    --text: #E7E5E4;
+    --text-secondary: #A8A29E;
+    --border: #292524;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 60px 40px 40px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .header h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .header .sub {
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+  .header .critique {
+    margin-top: 24px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+  .header .critique strong {
+    color: var(--text);
+  }
+
+  /* Concepts */
+  .concepts {
+    padding: 0 40px 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .concept {
+    margin-bottom: 80px;
+  }
+
+  .concept-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .concept-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+  }
+  .concept-name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .concept-name-en {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .concept-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-bottom: 32px;
+  }
+
+  .icon-preview-row {
+    display: flex;
+    gap: 48px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .icon-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .icon-display-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .icon-frame {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    background: var(--surface);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.3s;
+  }
+  .icon-frame:hover {
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  }
+
+  /* Size variants */
+  .icon-xl .icon-frame { width: 256px; height: 256px; }
+  .icon-lg .icon-frame { width: 128px; height: 128px; }
+  .icon-sm .icon-frame { width: 48px; height: 48px; }
+  .icon-xs .icon-frame { width: 32px; height: 32px; }
+
+  .icon-xl svg { width: 224px; height: 224px; }
+  .icon-lg svg { width: 102px; height: 102px; }
+  .icon-sm svg { width: 36px; height: 36px; }
+  .icon-xs svg { width: 22px; height: 22px; }
+
+  .size-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+  }
+
+  .sizes-label {
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    padding-bottom: 12px;
+  }
+
+  /* Context previews */
+  .context-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .context-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 220px;
+  }
+  .context-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.03em;
+  }
+  .dock-preview {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+  .dock-preview.light-dock {
+    background: linear-gradient(180deg, #E2E8F0 0%, #CBD5E1 100%);
+  }
+  .dock-preview.dark-dock {
+    background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  }
+  .dock-preview svg { width: 28px; height: 28px; }
+  .dock-preview .dock-label {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+
+  /* Philosophy */
+  .philosophy {
+    margin-top: 20px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .philosophy h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .philosophy ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+  .philosophy li {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .philosophy li::before {
+    content: '— ';
+    color: var(--text-secondary);
+  }
+
+  /* Recommendation badge */
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .badge.recommended {
+    background: #1E3A5F;
+    color: white;
+  }
+  .badge.alt {
+    background: var(--border);
+    color: var(--text-secondary);
+  }
+
+  /* Color swatch */
+  .color-info {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .color-swatch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    color: var(--text-secondary);
+  }
+  .color-swatch .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  /* Color ways section */
+  .color-ways {
+    margin-top: 60px;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .color-ways h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .color-grid {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .color-card {
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    min-width: 160px;
+  }
+  .color-card .preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .color-card .name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .color-card .hex {
+    font-size: 12px;
+    font-family: 'SF Mono', monospace;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    .header { padding: 40px 20px 24px; }
+    .header h1 { font-size: 32px; }
+    .concepts { padding: 0 20px 60px; }
+    .concept-header { flex-wrap: wrap; }
+    .icon-preview-row { gap: 24px; }
+    .icon-xl .icon-frame { width: 192px; height: 192px; }
+    .icon-xl svg { width: 164px; height: 164px; }
+    .context-row { gap: 12px; }
+    .context-card { width: 100%; }
+    .size-row { gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<div class="header">
+  <h1>清密 · 图标重新设计</h1>
+  <div class="sub">
+    从过度复杂的 Vite 派生图形，回归极简主义本质。<br>
+    四个概念，一个核心理念：<strong>更少，但更好。</strong>
+  </div>
+  <div class="critique">
+    <strong>当前图标的问题：</strong><br>
+    ① 本质是 Vite Logo 的变形——缺乏品牌独特性<br>
+    ② ~35 种蓝色调渐变 + 多层模糊/发光——违反"少即是多"<br>
+    ③ 26.7% 透明区域 + 15% 白色——视觉效率低<br>
+    ④ "V"形与"保险箱/密码管理"毫无关联
+  </div>
+</div>
+
+<!-- ============ CONCEPTS ============ -->
+<div class="concepts">
+
+  <!-- Concept 1: The Vault — 推荐 -->
+  <div class="concept">
+    <div class="concept-header">
+      <span class="concept-number">01</span>
+      <span class="badge recommended">推荐方案</span>
+    </div>
+    <h2 class="concept-name">保险箱门</h2>
+    <div class="concept-name-en">The Vault</div>
+    <div class="concept-desc">
+      一个带圆角的深色方块（保险箱本体），右侧一枚温润的圆形门把手。
+      两个几何形状——方与圆——传达"安全"与"开启"的张力。
+      极致的克制：两笔成形，零装饰。
+    </div>
+
+    <div class="icon-preview-row">
+      <div class="icon-display icon-xl">
+        <div class="icon-frame">
+          <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+            <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+            <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+          </svg>
+        </div>
+        <span class="icon-display-label">1024×1024</span>
+      </div>
+
+      <div class="size-row">
+        <span class="sizes-label">实际尺寸</span>
+        <div class="icon-display icon-lg">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+              <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+              <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">128px</span>
+        </div>
+        <div class="icon-display icon-sm">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+              <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+              <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">48px</span>
+        </div>
+        <div class="icon-display icon-xs">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+              <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+              <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">32px</span>
+        </div>
+      </div>
+
+      <div class="context-row">
+        <div class="context-card">
+          <span class="context-card-label">亮色 Dock</span>
+          <div class="dock-preview light-dock">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+              <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+              <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+            </svg>
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#334155"/>
+              <circle cx="580" cy="512" r="140" fill="#94A3B8"/>
+            </svg>
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#DC2626"/>
+              <rect x="300" y="300" width="424" height="424" rx="96" fill="white" opacity="0.9"/>
+            </svg>
+            <span class="dock-label">Finder</span>
+          </div>
+        </div>
+        <div class="context-card">
+          <span class="context-card-label">暗色 Dock</span>
+          <div class="dock-preview dark-dock">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1E293B"/>
+              <circle cx="660" cy="512" r="180" fill="#E2E8F0"/>
+              <circle cx="660" cy="512" r="196" fill="none" stroke="#1E293B" stroke-width="32"/>
+            </svg>
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#334155"/>
+              <circle cx="580" cy="512" r="140" fill="#94A3B8"/>
+            </svg>
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#DC2626"/>
+              <rect x="300" y="300" width="424" height="424" rx="96" fill="white" opacity="0.9"/>
+            </svg>
+            <span class="dock-label">Finder</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="philosophy">
+      <h4>设计理念</h4>
+      <ul>
+        <li>两笔成形——背景方块 + 圆形把手</li>
+        <li>总共 2 种颜色 / 3 个 SVG 元素</li>
+        <li>极深的靛蓝（#1E293B）传达安全感与信任</li>
+        <li>圆与方的几何张力——软/硬、开放/闭合</li>
+        <li>即使缩到 16px，圆形仍然清晰可辨</li>
+        <li>无渐变、无阴影、无装饰</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Concept 2: The Lock -->
+  <div class="concept">
+    <div class="concept-header">
+      <span class="concept-number">02</span>
+      <span class="badge alt">备选方案</span>
+    </div>
+    <h2 class="concept-name">抽象锁</h2>
+    <div class="concept-name-en">The Lock</div>
+    <div class="concept-desc">
+      将锁具减至最简：矩形锁体 + 半圆弧锁梁。没有钥匙孔、没有细节、
+      没有任何多余元素。纯粹的结构主义——只保留"锁"的认知轮廓。
+    </div>
+
+    <div class="icon-preview-row">
+      <div class="icon-display icon-xl">
+        <div class="icon-frame">
+          <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1024" height="1024" rx="224" fill="#0F172A"/>
+            <rect x="240" y="432" width="544" height="432" rx="88" fill="#E2E8F0"/>
+            <path d="M400 432 V 320 A 112 112 0 0 1 624 320 V 432" fill="none" stroke="#E2E8F0" stroke-width="80" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="icon-display-label">1024×1024</span>
+      </div>
+
+      <div class="size-row">
+        <span class="sizes-label">实际尺寸</span>
+        <div class="icon-display icon-lg">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#0F172A"/>
+              <rect x="240" y="432" width="544" height="432" rx="88" fill="#E2E8F0"/>
+              <path d="M400 432 V 320 A 112 112 0 0 1 624 320 V 432" fill="none" stroke="#E2E8F0" stroke-width="80" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">128px</span>
+        </div>
+        <div class="icon-display icon-sm">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#0F172A"/>
+              <rect x="240" y="432" width="544" height="432" rx="88" fill="#E2E8F0"/>
+              <path d="M400 432 V 320 A 112 112 0 0 1 624 320 V 432" fill="none" stroke="#E2E8F0" stroke-width="80" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">48px</span>
+        </div>
+        <div class="icon-display icon-xs">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#0F172A"/>
+              <rect x="240" y="432" width="544" height="432" rx="88" fill="#E2E8F0"/>
+              <path d="M400 432 V 320 A 112 112 0 0 1 624 320 V 432" fill="none" stroke="#E2E8F0" stroke-width="80" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">32px</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="philosophy">
+      <h4>设计理念</h4>
+      <ul>
+        <li>锁具的认知轮廓——人人都能立即识别</li>
+        <li>无钥匙孔、无齿纹——去除了所有非本质细节</li>
+        <li>深黑（#0F172A）背景强化"闭合/安全"感</li>
+        <li>锁梁的圆弧用粗线而非填充——保持通透感</li>
+        <li>缩到 32px 时锁的轮廓仍然完整可辨</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Concept 3: The Diamond -->
+  <div class="concept">
+    <div class="concept-header">
+      <span class="concept-number">03</span>
+      <span class="badge alt">备选方案</span>
+    </div>
+    <h2 class="concept-name">秘宝石</h2>
+    <div class="concept-name-en">The Diamond</div>
+    <div class="concept-desc">
+      菱形/"密"字意象——意为"珍贵之物"的几何抽象。
+      一个倾斜的菱形，底部被"切开"一道缝——暗示其中藏有秘密。
+      看起来像一颗被切割的宝石，也像汉字"口"的变形。
+    </div>
+
+    <div class="icon-preview-row">
+      <div class="icon-display icon-xl">
+        <div class="icon-frame">
+          <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1024" height="1024" rx="224" fill="#292524"/>
+            <path d="M512 160 L 800 512 L 512 864 L 224 512 Z" fill="#E2E8F0"/>
+            <rect x="482" y="520" width="60" height="200" rx="30" fill="#292524"/>
+          </svg>
+        </div>
+        <span class="icon-display-label">1024×1024</span>
+      </div>
+
+      <div class="size-row">
+        <span class="sizes-label">实际尺寸</span>
+        <div class="icon-display icon-lg">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#292524"/>
+              <path d="M512 160 L 800 512 L 512 864 L 224 512 Z" fill="#E2E8F0"/>
+              <rect x="482" y="520" width="60" height="200" rx="30" fill="#292524"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">128px</span>
+        </div>
+        <div class="icon-display icon-sm">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#292524"/>
+              <path d="M512 160 L 800 512 L 512 864 L 224 512 Z" fill="#E2E8F0"/>
+              <rect x="482" y="520" width="60" height="200" rx="30" fill="#292524"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">48px</span>
+        </div>
+        <div class="icon-display icon-xs">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#292524"/>
+              <path d="M512 160 L 800 512 L 512 864 L 224 512 Z" fill="#E2E8F0"/>
+              <rect x="482" y="520" width="60" height="200" rx="30" fill="#292524"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">32px</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="philosophy">
+      <h4>设计理念</h4>
+      <ul>
+        <li>菱形 = 珍贵、宝石、珍藏——与"安全存放"呼应</li>
+        <li>底部的"缝"暗示内含秘密，引发好奇心</li>
+        <li>同样可以解读为汉字的抽象结构</li>
+        <li>暖灰背景（#292524）营造沉稳、质感</li>
+        <li>独特的几何形状在 Dock 中极具辨识度</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Concept 4: The Gateway -->
+  <div class="concept">
+    <div class="concept-header">
+      <span class="concept-number">04</span>
+      <span class="badge alt">备选方案</span>
+    </div>
+    <h2 class="concept-name">拱门</h2>
+    <div class="concept-name-en">The Gateway</div>
+    <div class="concept-desc">
+      一道拱形门——象征"通往安全之地的入口"。
+      负空间在拱门内部形成一个"钥匙孔"般的形状。
+      最极简的表达：一条连续的线条构成拱门，其余都是留白。
+    </div>
+
+    <div class="icon-preview-row">
+      <div class="icon-display icon-xl">
+        <div class="icon-frame">
+          <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1024" height="1024" rx="224" fill="#1C1917"/>
+            <path d="M 300 824 V 400 A 212 212 0 0 1 724 400 V 824" fill="none" stroke="#E2E8F0" stroke-width="72" stroke-linecap="round"/>
+            <line x1="512" y1="720" x2="512" y2="824" stroke="#1C1917" stroke-width="72" stroke-linecap="round"/>
+            <circle cx="512" cy="460" r="48" fill="#E2E8F0"/>
+          </svg>
+        </div>
+        <span class="icon-display-label">1024×1024</span>
+      </div>
+
+      <div class="size-row">
+        <span class="sizes-label">实际尺寸</span>
+        <div class="icon-display icon-lg">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1C1917"/>
+              <path d="M 300 824 V 400 A 212 212 0 0 1 724 400 V 824" fill="none" stroke="#E2E8F0" stroke-width="72" stroke-linecap="round"/>
+              <line x1="512" y1="720" x2="512" y2="824" stroke="#1C1917" stroke-width="72" stroke-linecap="round"/>
+              <circle cx="512" cy="460" r="48" fill="#E2E8F0"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">128px</span>
+        </div>
+        <div class="icon-display icon-sm">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1C1917"/>
+              <path d="M 300 824 V 400 A 212 212 0 0 1 724 400 V 824" fill="none" stroke="#E2E8F0" stroke-width="72" stroke-linecap="round"/>
+              <line x1="512" y1="720" x2="512" y2="824" stroke="#1C1917" stroke-width="72" stroke-linecap="round"/>
+              <circle cx="512" cy="460" r="48" fill="#E2E8F0"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">48px</span>
+        </div>
+        <div class="icon-display icon-xs">
+          <div class="icon-frame">
+            <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1024" height="1024" rx="224" fill="#1C1917"/>
+              <path d="M 300 824 V 400 A 212 212 0 0 1 724 400 V 824" fill="none" stroke="#E2E8F0" stroke-width="72" stroke-linecap="round"/>
+              <line x1="512" y1="720" x2="512" y2="824" stroke="#1C1917" stroke-width="72" stroke-linecap="round"/>
+              <circle cx="512" cy="460" r="48" fill="#E2E8F0"/>
+            </svg>
+          </div>
+          <span class="icon-display-label">32px</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="philosophy">
+      <h4>设计理念</h4>
+      <ul>
+        <li>拱门 = 入口、通道、"进入安全区域"</li>
+        <li>连续的粗线拱形 + 内部负空间 = 钥匙孔意象</li>
+        <li>最顶部的圆形是唯一"实心"元素——聚焦点</li>
+        <li>暗色背景（#1C1917）让拱门线条成为视觉引导</li>
+        <li>负空间与正形的关系创造深度</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ COLOR PALETTES ============ -->
+  <div class="color-ways">
+    <h3>配色方案选项</h3>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
+      推荐保留深色调（与安全/信任的心理联想一致）。以下为可选的色彩方向：
+    </p>
+    <div class="color-grid">
+
+      <div class="color-card">
+        <div class="preview" style="background: #1E293B; border-radius: 12px;"></div>
+        <div class="name">深靛蓝</div>
+        <div class="hex">#1E293B</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">推荐 · 专业可靠</div>
+      </div>
+
+      <div class="color-card">
+        <div class="preview" style="background: #0F172A; border-radius: 12px;"></div>
+        <div class="name">极深蓝黑</div>
+        <div class="hex">#0F172A</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">极致 · 沉稳</div>
+      </div>
+
+      <div class="color-card">
+        <div class="preview" style="background: #1C1917; border-radius: 12px;"></div>
+        <div class="name">暖石黑</div>
+        <div class="hex">#1C1917</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">温暖 · 质感</div>
+      </div>
+
+      <div class="color-card">
+        <div class="preview" style="background: #292524; border-radius: 12px;"></div>
+        <div class="name">暖灰</div>
+        <div class="hex">#292524</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">禅意 · 静谧</div>
+      </div>
+
+      <div class="color-card">
+        <div class="preview" style="background: #6C5CE7; border-radius: 12px;"></div>
+        <div class="name">品牌紫（现有）</div>
+        <div class="hex">#6C5CE7</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">保持连续性</div>
+      </div>
+
+      <div class="color-card">
+        <div class="preview" style="background: #3B4D5E; border-radius: 12px;"></div>
+        <div class="name">岩灰蓝</div>
+        <div class="hex">#3B4D5E</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">中性 · 优雅</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Comparison section -->
+  <div style="margin-top: 60px;">
+    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 20px;">方案对比</h3>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="text-align: left; padding: 12px 16px; font-weight: 600;">维度</th>
+            <th style="text-align: center; padding: 12px 16px; font-weight: 600; background: #1E293B10; border-radius: 8px 0 0 0;">01 保险箱门 ★</th>
+            <th style="text-align: center; padding: 12px 16px; font-weight: 600;">02 抽象锁</th>
+            <th style="text-align: center; padding: 12px 16px; font-weight: 600;">03 秘宝石</th>
+            <th style="text-align: center; padding: 12px 16px; font-weight: 600;">04 拱门</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px 16px; color: var(--text-secondary);">极简程度</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px 16px; color: var(--text-secondary);">辨识度</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px 16px; color: var(--text-secondary);">独特性</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★☆☆☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 12px 16px; color: var(--text-secondary);">品牌关联度</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 16px; color: var(--text-secondary);">小尺寸表现</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★★★</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+            <td style="text-align: center; padding: 12px 16px;">★★★☆☆</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  清密 · 图标重新设计 — 极简主义方向<br>
+  <span style="opacity: 0.6;">期待您的反馈</span>
+</div>
+
+</body>
+</html>

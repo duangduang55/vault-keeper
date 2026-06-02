@@ -71,7 +71,7 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-surface-800">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-surface-700/50">
           <h3 className="text-[15px] font-medium text-surface-100 truncate flex-1">{entry.name}</h3>
           <div className="flex items-center gap-0.5">
             <Button variant="ghost" size="sm" onClick={onEdit}>
@@ -97,7 +97,7 @@ export function EntryDetail({ entry, onEdit }: EntryDetailProps) {
             {Object.entries(fields).filter(([k]) => k !== '_sensitive').map(([key, value]) => {
               const visible = visibleFields.has(key) || !isPasswordField(template, key, fields)
               return (
-                <div key={key} className="bg-surface-800 rounded-[10px] p-3 border border-surface-700">
+                <div key={key} className="bg-surface-800/60 rounded p-3 border border-surface-700/50">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-surface-400">{getFieldLabel(key)}</span>
                     <div className="flex items-center gap-1">

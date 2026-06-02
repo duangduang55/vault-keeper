@@ -11,11 +11,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-primary-500 text-white hover:bg-primary-400 active:bg-primary-600',
+    'bg-primary-500 text-white hover:bg-primary-400 active:bg-primary-600 shadow-sm shadow-primary-500/20',
   secondary:
-    'bg-surface-800 text-surface-100 hover:bg-surface-700 active:bg-surface-600 border border-surface-600',
+    'bg-surface-800/60 text-surface-100 hover:bg-surface-700 active:bg-surface-600 border border-surface-600/50',
   ghost:
-    'text-surface-300 hover:text-surface-100 hover:bg-surface-800 active:bg-surface-700',
+    'text-surface-400 hover:text-surface-100 hover:bg-surface-800/60 active:bg-surface-700/60',
   danger:
     'bg-red-500 text-white hover:bg-red-400 active:bg-red-600',
 }
@@ -36,7 +36,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-[10px] font-medium
+      className={`inline-flex items-center justify-center gap-2 rounded font-medium
         focus:outline-none focus:ring-2 focus:ring-primary-500/50
         disabled:opacity-40 disabled:cursor-not-allowed
         transition-all duration-200 ease-out active:scale-[0.97]

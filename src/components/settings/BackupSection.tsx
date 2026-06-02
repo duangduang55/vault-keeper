@@ -68,7 +68,7 @@ export function BackupSection() {
 
   return (
     <>
-      <section className="bg-surface-800 border border-surface-800 rounded-[10px] p-4 space-y-3">
+      <section className="bg-surface-800 border border-surface-800 rounded p-4 space-y-3">
         <h3 className="text-sm font-medium text-surface-100">数据备份</h3>
         <p className="text-xs text-surface-500">加密导出所有条目，或从备份文件中恢复数据</p>
         <div className="flex gap-2">
@@ -90,7 +90,7 @@ export function BackupSection() {
             <label className="block text-xs font-medium text-surface-300 mb-1">保存路径</label>
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-200 placeholder-surface-500 read-only:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+                className="flex-1 bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-200 placeholder-surface-500 read-only:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
                 value={path || '点击右侧按钮选择保存路径'}
                 readOnly
               />
@@ -112,7 +112,7 @@ export function BackupSection() {
             <label className="block text-xs font-medium text-surface-300 mb-1">备份文件</label>
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-surface-800 border border-surface-600 rounded-[10px] px-3 py-2 text-sm text-surface-200 placeholder-surface-500 read-only:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
+                className="flex-1 bg-surface-800 border border-surface-600/50 rounded px-3 py-2 text-sm text-surface-200 placeholder-surface-500 read-only:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all duration-200"
                 value={path || '点击右侧按钮选择备份文件'}
                 readOnly
               />

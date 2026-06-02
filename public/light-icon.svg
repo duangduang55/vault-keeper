@@ -1,0 +1,9 @@
+<svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base: white rounded square (gentler corners) -->
+  <rect width="1024" height="1024" rx="160" fill="#FFFFFF"/>
+  <rect width="1024" height="1024" rx="160" fill="none" stroke="#E2E8F0" stroke-width="2"/>
+  <!-- Door handle: circular, deep slate -->
+  <circle cx="640" cy="512" r="160" fill="#1E293B"/>
+  <!-- Handle inner ring -->
+  <circle cx="640" cy="512" r="176" fill="none" stroke="#CBD5E1" stroke-width="32"/>
+</svg>

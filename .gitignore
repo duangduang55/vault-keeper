@@ -60,5 +60,8 @@ index.html
 # Release artifacts (local backup)
 release/
 
+# Tauri icon source (temp, cleaned after build)
+src-tauri/app-icon.svg
+
 # Runtime logs
 logs/
